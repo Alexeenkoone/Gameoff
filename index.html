@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Дневник Подземелья</title>
+<!-- Раскомментируй после получения blockId AdsGram:
+<script src="https://sad.adsgram.ai/ad/s.min.js"></script>
+-->
+<style>
+:root{--bg:#12121f;--panel:#1e1e2e;--line:#3a3a52;--txt:#e5e7eb;--mut:#9ca3af;--gold:#fbbf24;--green:#22c55e;--red:#ef4444;--purple:#8b5cf6}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);display:flex;flex-direction:column;height:100vh;overflow:hidden;user-select:none}
+header{display:flex;gap:6px;padding:8px;background:#0c0c16;border-bottom:1px solid var(--line)}
+.stat{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;background:var(--panel);border-radius:10px;padding:7px 2px;font-weight:700;font-size:13px}
+.stat svg{width:15px;height:15px;flex:none}
+main{flex:1;overflow-y:auto;position:relative}
+.screen{display:none;min-height:100%;padding-bottom:8px}
+.screen.on{display:block}
+nav{display:flex;border-top:1px solid var(--line);background:#0c0c16}
+nav button{flex:1;padding:12px;background:none;border:0;color:var(--mut);font-size:15px;font-weight:700}
+nav button.on{color:var(--gold)}
+.card{background:var(--panel);border-radius:14px;padding:14px;margin:10px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.rowline{display:flex;justify-content:space-between;align-items:center;padding-bottom:6px}
+.btn{display:block;width:100%;border:0;border-radius:12px;padding:14px;font-size:16px;font-weight:800;color:#1c1917;background:var(--gold);margin-top:8px}
+.btn.g{background:var(--green);color:#052e16}
+.btn.p{background:var(--purple);color:#fff}
+.btn.d{background:#374151;color:#fff}
+.btn:disabled{opacity:.45}
+.small{color:var(--mut);font-size:13px}
+.gold-t{color:var(--gold)}
+.bar{background:#0c0c16;border-radius:99px;height:14px;overflow:hidden;border:1px solid var(--line)}
+.bar>div{height:100%;border-radius:99px;transition:width .2s}
+#scene{position:relative;height:230px;border-radius:14px;overflow:hidden;background:#171726}
+#scene svg.bgimg{position:absolute;inset:0;width:100%;height:100%}
+#heroWrap{position:absolute;bottom:14px;left:18%;width:70px;transition:left .1s linear}
+#enemyWrap{position:absolute;bottom:14px;right:12%;width:64px;display:none}
+.sprite{width:100%;display:block}
+.leg{transform-origin:center 62px}
+.walking .leg.l{animation:legA .35s infinite alternate ease-in-out}
+.walking .leg.r{animation:legB .35s infinite alternate ease-in-out}
+.walking .bod{animation:bob .35s infinite alternate ease-in-out}
+@keyframes legA{from{transform:rotate(16deg)}to{transform:rotate(-16deg)}}
+@keyframes legB{from{transform:rotate(-16deg)}to{transform:rotate(16deg)}}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-2px)}}
+.flame{animation:flick .5s infinite alternate;transform-origin:bottom center}
+@keyframes flick{from{transform:scaleY(1)}to{transform:scaleY(.75)}}
+.slime{animation:squash 1s infinite alternate ease-in-out;transform-origin:bottom center}
+@keyframes squash{from{transform:scaleY(1)}to{transform:scaleY(.88)}}
+.hit{animation:hitf .25s}
+@keyframes hitf{0%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}100%{transform:translateX(0)}}
+.float{position:absolute;font-weight:900;font-size:18px;pointer-events:none;animation:fl 1s forwards;z-index:5}
+@keyframes fl{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-34px)}}
+#timing{position:relative;height:22px;background:#0c0c16;border-radius:8px;margin-top:8px;overflow:hidden;border:1px solid var(--line)}
+#zone{position:absolute;top:0;bottom:0;background:rgba(34,197,94,.8)}
+#cursor{position:absolute;top:-2px;bottom:-2px;width:4px;background:#fff;border-radius:2px}
+.dots{display:flex;gap:6px;margin-top:6px}
+.dot{width:12px;height:12px;border-radius:50%;background:#33334a}
+.dot.on{background:var(--green)}
+#modalBg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+#modalBg.on{display:flex}
+#modalBox{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:360px;width:100%;text-align:center;max-height:80vh;overflow-y:auto}
+#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:var(--purple);color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;z-index:60;display:none;max-width:90vw;text-align:center}
+h2{margin:14px 10px 0;font-size:20px}
+#errlog{color:#f87171;padding:10px;font-size:12px;white-space:pre-wrap;word-break:break-all}
+</style>
+</head>
+<body>
+<div id="errlog"></div>
+<script>window.onerror=function(m,s,l){var e=document.getElementById('errlog');if(e)e.textContent='ОШИБКА: '+m+' (строка '+l+')';};</script>
+<header id="hud"></header>
+<main>
+  <section id="sc-camp" class="screen on"></section>
+  <section id="sc-dun" class="screen">
+    <div class="card" style="padding:10px 14px">
+      <div class="rowline"><b id="flLabel">Этаж 1</b><span class="small" id="flRecord"></span></div>
+      <div class="bar"><div id="prog" style="width:0%;background:linear-gradient(90deg,#f59e0b,#fde047)"></div></div>
+    </div>
+    <div class="card" style="padding:8px" id="sceneCard">
+      <div id="scene"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+        <svg viewBox="0 0 24 24" width="18"><path fill="#ef4444" d="M12 21s-8-5.5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.5-8 11-8 11z"/></svg>
+        <div class="bar" style="flex:1"><div id="hpBar" style="width:100%;background:#ef4444"></div></div>
+        <b id="hpTxt">50/50</b>
+      </div>
+      <div id="battleBox" style="display:none;margin-top:10px">
+        <div class="rowline"><b id="enName">Враг</b><span class="small" id="enHpTxt"></span></div>
+        <div class="bar"><div id="enHp" style="width:100%;background:#a855f7"></div></div>
+        <div id="timing"><div id="zone"></div><div id="cursor"></div></div>
+        <div class="small" style="margin-top:4px">Ударь, когда курсор в зелёной зоне — крит ×2</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn g" id="btnHit" style="flex:2;margin:0" onclick="hitEnemy()">⚔ Удар</button>
+          <button class="btn" id="btnPot" style="flex:1;margin:0;font-size:13px" onclick="usePotion()">🧪 Зелье 5💎</button>
+        </div>
+        <button class="btn d" onclick="flee()">Сбежать (добыча при тебе)</button>
+      </div>
+      <div id="eventBox"></div>
+    </div>
+    <div class="card"><button class="btn" style="margin:0" onclick="goCamp()">🏠 Вернуться в лагерь</button></div>
+  </section>
+</main>
+<nav>
+  <button id="navCamp" class="on" onclick="goCamp()">🏕 Лагерь</button>
+  <button id="navDun" onclick="startRun('dungeon')">⛏ Подземелье</button>
+</nav>
+<div id="modalBg" onclick="if(event.target===this)closeModal()"><div id="modalBox"></div></div>
+<div id="toast"></div>
+<script>
+'use strict';
+try{
+const AD_BLOCK_ID='PASTE_YOUR_ADSGRAM_ID';
+const BOT_NAME='YOUR_BOT_NAME';
+const DEF={gold:20,wood:0,stone:0,gems:25,up:{sword:1,boots:1,pack:1,armor:1},hero:'warrior',floor:1,record:1,bag:{wood:0,stone:0},adFree:false,lastChest:0,rating:0,wins:0,tut:false,hp:50};
+let S; try{S=Object.assign(JSON.parse(JSON.stringify(DEF)),JSON.parse(localStorage.getItem('dunSave')||'{}'))}catch(e){S=JSON.parse(JSON.stringify(DEF))}
+function save(){try{localStorage.setItem('dunSave',JSON.stringify(S))}catch(e){}}
+
+/* ---------- герой и формулы ---------- */
+const HEROES={
+ warrior:{name:'Воин',color:'#8a4b2f',hpM:1.3,dmgM:1,dodge:.05,crit:.15,desc:'Крепкий, много здоровья'},
+ rogue:{name:'Разбойник',color:'#3f6d4e',hpM:.9,dmgM:.9,dodge:.2,crit:.35,desc:'Частые криты и увороты'},
+ mage:{name:'Магистр',color:'#4f5d9e',hpM:.8,dmgM:1.5,dodge:.1,crit:.2,desc:'Мощный урон, но хрупкий'}};
+function maxHP(){return Math.round((50+20*(S.up.armor-1))*HEROES[S.hero].hpM)}
+function heroDmg(){return Math.round((5+3*(S.up.sword-1))*HEROES[S.hero].dmgM)}
+function packCap(){return 20*S.up.pack}
+function walkSpeed(){return 22*(1+.12*(S.up.boots-1))}
+function upCost(k){return Math.round({sword:20,boots:30,pack:25,armor:40}[k]*Math.pow(1.7,S.up[k]-1))}
+const ico={coin:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#fbbf24" stroke="#92400e" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="#fde68a"/></svg>',
+ wood:'<svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="9" rx="3" fill="#a16207" stroke="#713f12" stroke-width="2"/></svg>',
+ stone:'<svg viewBox="0 0 24 24"><path d="M5 17l3-9 8-2 4 8-4 5H6z" fill="#6b7280" stroke="#374151" stroke-width="2"/></svg>',
+ gem:'<svg viewBox="0 0 24 24"><path d="M12 3l7 6-7 12L5 9z" fill="#34d399" stroke="#065f46" stroke-width="2"/></svg>'};
+
+/* ---------- графика ---------- */
+function heroSVG(c){return '<svg viewBox="0 0 60 90" class="sprite"><g class="bod"><g class="leg l"><rect x="22" y="62" width="7" height="24" rx="3" fill="#4a3728"/></g><g class="leg r"><rect x="31" y="62" width="7" height="24" rx="3" fill="#4a3728"/></g><rect x="16" y="34" width="28" height="30" rx="8" fill="'+c+'"/><rect x="16" y="46" width="28" height="5" fill="#3a2a1c"/><circle cx="30" cy="22" r="13" fill="#f2c49b"/><path d="M17 22a13 13 0 0 1 26 0l0-4a13 13 0 0 0-26 0z" fill="#5a4632"/><circle cx="26" cy="25" r="1.7" fill="#222"/><circle cx="34" cy="25" r="1.7" fill="#222"/></g></svg>'}
+function slimeSVG(c){return '<svg viewBox="0 0 60 50" class="sprite"><g class="slime"><path d="M6 46c0-20 10-34 24-34s24 14 24 34z" fill="'+c+'" stroke="#1f2937" stroke-width="3"/><circle cx="22" cy="30" r="3.5" fill="#111"/><circle cx="38" cy="30" r="3.5" fill="#111"/><path d="M22 40q8 5 16 0" stroke="#111" stroke-width="2.5" fill="none"/></g></svg>'}
+const batSVG='<svg viewBox="0 0 60 40" class="sprite"><path d="M30 12L12 4l6 10-12 2 12 6-6 10 14-8v-4z" fill="#4b5563" stroke="#1f2937" stroke-width="2"/><path d="M30 12l18-8-6 10 12 2-12 6 6 10-14-8v-4z" fill="#4b5563" stroke="#1f2937" stroke-width="2"/><ellipse cx="30" cy="20" rx="7" ry="9" fill="#6b7280" stroke="#1f2937" stroke-width="2"/><circle cx="27" cy="18" r="2" fill="#f87171"/><circle cx="33" cy="18" r="2" fill="#f87171"/></svg>';
+const skeletonSVG='<svg viewBox="0 0 60 80" class="sprite"><circle cx="30" cy="16" r="11" fill="#e5e7eb" stroke="#374151" stroke-width="3"/><circle cx="26" cy="15" r="2.4" fill="#111"/><circle cx="34" cy="15" r="2.4" fill="#111"/><rect x="27" y="21" width="6" height="3" fill="#111"/><rect x="22" y="29" width="16" height="5" rx="2" fill="#9ca3af"/><rect x="24" y="34" width="12" height="22" fill="#d1d5db" stroke="#6b7280" stroke-width="2"/><rect x="18" y="56" width="8" height="20" rx="3" fill="#d1d5db" stroke="#6b7280" stroke-width="2"/><rect x="34" y="56" width="8" height="20" rx="3" fill="#d1d5db" stroke="#6b7280" stroke-width="2"/></svg>';
+const sceneSVG='<svg viewBox="0 0 400 230" class="bgimg" preserveAspectRatio="xMidYMid slice"><rect width="400" height="230" fill="#26262e"/><g fill="#2e2e38" stroke="#1c1c24" stroke-width="2">'+Array.from({length:5},function(_,r){return Array.from({length:8},function(_,c){return '<rect x="'+(c*52+(r%2?26:0)-26)+'" y="'+(r*38)+'" width="48" height="34" rx="4"/>'}).join('')}).join('')+'</g><rect y="190" width="400" height="40" fill="#3a3a44" stroke="#1c1c24" stroke-width="2"/><path d="M330 190v-70a26 26 0 0 1 52 0v70z" fill="#101018" stroke="#1c1c24" stroke-width="3"/><g><rect x="70" y="120" width="6" height="40" fill="#6b4423"/><g class="flame"><ellipse cx="73" cy="114" rx="7" ry="11" fill="#f59e0b"/><ellipse cx="73" cy="118" rx="4" ry="6" fill="#fde047"/></g><circle cx="73" cy="116" r="40" fill="#f59e0b" opacity=".08"/></g><g><rect x="240" y="120" width="6" height="40" fill="#6b4423"/><g class="flame"><ellipse cx="243" cy="114" rx="7" ry="11" fill="#f59e0b"/><ellipse cx="243" cy="118" rx="4" ry="6" fill="#fde047"/></g><circle cx="243" cy="116" r="40" fill="#f59e0b" opacity=".08"/></g><g fill="#34d399" opacity=".5"><circle cx="150" cy="205" r="3"/><circle cx="190" cy="212" r="2.5"/><circle cx="290" cy="207" r="3"/></g></svg>';
+const veinSVG='<svg viewBox="0 0 90 70"><path d="M10 60L22 18l24-10 30 18-8 34z" fill="#6b7280" stroke="#374151" stroke-width="3"/><circle cx="35" cy="35" r="6" fill="#fbbf24" stroke="#92400e" stroke-width="2"/><circle cx="55" cy="28" r="5" fill="#fbbf24" stroke="#92400e" stroke-width="2"/><circle cx="50" cy="48" r="4" fill="#fbbf24" stroke="#92400e" stroke-width="2"/></svg>';
+const chestSVG='<svg viewBox="0 0 90 70"><rect x="10" y="28" width="70" height="34" rx="6" fill="#92400e" stroke="#451a03" stroke-width="3"/><path d="M10 34a35 16 0 0 1 70 0z" fill="#b45309" stroke="#451a03" stroke-width="3"/><rect x="40" y="36" width="10" height="14" rx="2" fill="#fbbf24" stroke="#92400e" stroke-width="2"/></svg>';
+
+/* ---------- утилиты ---------- */
+function $(id){return document.getElementById(id)}
+function toast(t,ms){var e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(function(){e.style.display='none'},ms||2200)}
+function modal(html){$('modalBox').innerHTML=html;$('modalBg').classList.add('on')}
+function closeModal(){$('modalBg').classList.remove('on')}
+function goCamp(){stopRun();$('navCamp').classList.add('on');$('navDun').classList.remove('on');$('sc-camp').classList.add('on');$('sc-dun').classList.remove('on');renderCamp()}
+
+/* ---------- HUD и лагерь ---------- */
+function renderHUD(){$('hud').innerHTML='<div class="stat">'+ico.coin+'<span>'+S.gold+'</span></div><div class="stat">'+ico.wood+'<span>'+S.wood+'</span></div><div class="stat">'+ico.stone+'<span>'+S.stone+'</span></div><div class="stat">'+ico.gem+'<span>'+S.gems+'</span></div>'}
+function renderCamp(){
+  var h=HEROES[S.hero], bag=S.bag.wood+S.bag.stone;
+  var html='<h2>🏕 Лагерь</h2>';
+  html+='<div class="card"><b>'+h.name+'</b> — '+h.desc+'<div class="small">Урон '+heroDmg()+' · ХП '+maxHP()+' · Уворот '+Math.round(h.dodge*100)+'% · Крит '+Math.round(h.crit*100)+'%</div><button class="btn" onclick="pickHero()">Сменить героя (бесплатно)</button></div>';
+  html+='<div class="card"><b>⚒ Экипировка</b>';
+  [['sword','🗡 Меч','Урон: '+heroDmg()],['boots','👟 Сапоги','Скорость: ×'+(1+.12*(S.up.boots-1)).toFixed(1)],['pack','🎒 Рюкзак','Вмещает: '+packCap()],['armor','🛡 Броня','Здоровье: '+maxHP()]].forEach(function(r){
+    html+='<div class="row"><div><b>'+r[1]+' ур.'+S.up[r[0]]+'</b><div class="small">'+r[2]+'</div></div><button class="btn" style="width:auto;margin:0;padding:8px 14px;font-size:14px" onclick="buy(\''+r[0]+'\')">'+upCost(r[0])+' '+ico.coin+'</button></div>'});
+  html+='</div>';
+  html+='<div class="card">';
+  if(bag>0){var sum=S.bag.wood*3+S.bag.stone*5;
+    html+='<button class="btn g" onclick="sell(1)">Продать ресурсы (+'+sum+' зол.)</button>';
+    if(!S.adFree)html+='<button class="btn p" onclick="watchAd(function(){sell(2)})">📺 Реклама: продать ×2</button>';
+  } else html+='<div class="small" style="text-align:center">Рюкзак пуст — иди добывать в подземелье</div>';
+  html+='</div>';
+  var left=Math.max(0,S.lastChest+4*3600000-Date.now());
+  html+='<div class="card"><button class="btn" '+(left>0?'disabled':'')+' onclick="dailyChest()">🎁 Сундук дня</button><div class="small" style="text-align:center">'+(left>0?'Следующий через: '+Math.floor(left/3600000)+' ч '+Math.round(left%3600000/60000)+' мин':'Готов!')+'</div></div>';
+  html+='<div class="card"><button class="btn" style="margin:0" onclick="startRun(\'mine\')">⚒ Шахта — PVE-фарм</button><div class="small" style="text-align:center">Волны врагов, при смерти добыча сохраняется</div></div>';
+  html+='<div class="card"><button class="btn" style="margin:0" onclick="startRun(\'arena\')">⚔ Арена — рейтинг '+(S.rating||0)+' · побед: '+(S.wins||0)+'</button></div>';
+  html+='<div class="card">';
+  if(!S.adFree)html+='<button class="btn p" onclick="removeAds()">🚫 Убрать рекламу (150 '+ico.gem+')</button>';
+  html+='<button class="btn" onclick="share()">📣 Позвать друга (+25 '+ico.gem+')</button></div>';
+  $('sc-camp').innerHTML=html;renderHUD();
+}
+function buy(k){var c=upCost(k);if(S.gold<c)return toast('Не хватает золота');S.gold-=c;S.up[k]++;if(k==='armor')S.hp=Math.min(S.hp+20,maxHP());save();renderCamp();toast('Улучшено!')}
+function sell(x){if(S.bag.wood+S.bag.stone===0)return;var sum=(S.bag.wood*3+S.bag.stone*5)*x;S.gold+=sum;S.bag={wood:0,stone:0};save();renderCamp();toast('+'+sum+' золота'+(x>1?' (×2 за просмотр)':''))}
+function dailyChest(){S.lastChest=Date.now();var g=3+Math.floor(Math.random()*5);S.gems+=g;S.gold+=15;save();renderCamp();toast('🎁 Сундук: +'+g+' кристаллов, +15 золота')}
+function removeAds(){if(S.gems<150)return toast('Нужно 150 кристаллов');S.gems-=150;S.adFree=true;save();renderCamp();toast('Реклама отключена навсегда')}
+function share(){var url='https://t.me/'+BOT_NAME+'?start=ref_'+(S.uid||'guest');
+  if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.switchInlineQuery){Telegram.WebApp.switchInlineQuery('Играем в Дневник Подземелья! '+url)}else{try{navigator.clipboard.writeText(url);toast('Ссылка скопирована! Вставь её другу')}catch(e){toast(url,4000)}}}
+function pickHero(){var html='<h3 style="margin-bottom:10px">Выбор героя</h3>';
+  Object.keys(HEROES).forEach(function(k){var h=HEROES[k];html+='<div class="row"><div><b>'+h.name+'</b><div class="small">'+h.desc+'</div></div>'+(S.hero===k?'<b class="gold-t">Активен</b>':'<button class="btn" style="width:auto;margin:0;padding:8px 12px;font-size:13px" onclick="setHero(\''+k+'\')">Выбрать</button>')+'</div>'});
+  html+='<button class="btn" onclick="closeModal()">Закрыть</button>';modal(html)}
+function setHero(k){S.hero=k;S.hp=maxHP();save();closeModal();renderCamp();toast(HEROES[k].name+' готов к спуску!')}
+
+/* ---------- забег ---------- */
+var mode='dungeon',run=null,battle=null,walkIv=null,raf=null,lastTs=0,enIv=null,tutStep=0;
+function startRun(m){mode=m;run={progress:0,wave:0};
+  if(m==='arena'){showTabDun();startBattle(arenaEnemy());return}
+  S.hp=maxHP();save();
+  if(!S.tut){showTabDun();showTutorial();return}
+  showTabDun();beginWalk()}
+function showTabDun(){$('navDun').classList.add('on');$('navCamp').classList.remove('on');$('sc-dun').classList.add('on');$('sc-camp').classList.remove('on')}
+function beginWalk(){
+  $('battleBox').style.display='none';$('eventBox').innerHTML='';$('enemyWrap').style.display='none';
+  $('heroWrap').classList.add('walking');
+  clearInterval(walkIv);
+  walkIv=setInterval(function(){
+    if(!run)return;
+    run.progress+=walkSpeed()*0.05;
+    if(run.progress>=100){clearInterval(walkIv);run.progress=0;nextFloor();return}
+    $('prog').style.width=(run.progress%100)+'%';
+    $('heroWrap').style.left=(10+78*(run.progress%100)/100)+'%';
+  },50)}
+function nextFloor(){
+  if(mode==='dungeon'){S.floor++;if(S.floor>S.record){S.record=S.floor;save()}}
+  else run.wave++;
+  updateFloorLabels();
+  if(mode==='dungeon'&&S.floor%5===0){startBattle(makeEnemy(true));return}
+  if(mode==='mine'){if(Math.random()<.5){startBattle(makeEnemy(false));return}showVein();return}
+  var r=Math.random();
+  if(r<.45)showVein();else if(r<.60)showChest();else if(r<.90)startBattle(makeEnemy(false));else{toast('Тихий этаж... идём дальше');setTimeout(beginWalk,700)}}
+function updateFloorLabels(){
+  if(mode==='mine'){$('flLabel').textContent='Волна '+run.wave;$('flRecord').textContent='Шахта: добыча сохраняется при смерти'}
+  else if(mode==='arena'){$('flLabel').textContent='Арена';$('flRecord').textContent='Рейтинг: '+(S.rating||0)}
+  else{$('flLabel').innerHTML='Этаж <span class="gold-t">'+S.floor+'</span>';$('flRecord').textContent='рекорд: '+S.record}
+  renderHUD()}
+
+/* ---------- события ---------- */
+var veinTaps=0;
+function showVein(){veinTaps=0;
+  $('eventBox').innerHTML='<div style="display:flex;gap:10px;align-items:flex-start;margin-top:8px"><div style="flex:none;width:80px">'+veinSVG+'</div><div style="flex:1"><b>Золотая жила!</b><div class="small">Каждый удар кайлом даёт камень и '+(2+S.floor)+' золота.</div><div class="dots" id="vdots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><button class="btn" id="btnDig" style="margin-top:6px" onclick="dig()">⛏ Копать</button></div></div>'}
+function dig(){if(veinTaps>=3)return;veinTaps++;
+  S.bag.stone+=1;S.gold+=2+S.floor;renderHUD();save();
+  $('vdots').children[veinTaps-1].classList.add('on');
+  if(S.bag.wood+S.bag.stone>=packCap())toast('Рюкзак полон! Продай в лагере');
+  if(veinTaps>=3){$('btnDig').disabled=true;setTimeout(beginWalk,600)}}
+function showChest(){
+  $('eventBox').innerHTML='<div style="display:flex;gap:10px;align-items:flex-start;margin-top:8px"><div style="flex:none;width:80px">'+chestSVG+'</div><div style="flex:1"><b>Старый сундук</b><div class="small">Внутри что-то блестит...</div><button class="btn" id="btnChest" style="margin-top:6px" onclick="chestOpen()">🔑 Открыть</button></div></div>'}
+function chestOpen(){var g=2+Math.floor(Math.random()*4),c=10+S.floor*3;S.gems+=g;S.gold+=c;S.bag.wood+=2;renderHUD();save();$('btnChest').disabled=true;toast('В сундуке: +'+c+' золота, +'+g+' кристаллов!');setTimeout(beginWalk,700)}
+
+/* ---------- бой ---------- */
+function makeEnemy(guard){
+  var f=mode==='mine'?run.wave:S.floor;
+  var pool=[['Слизень',slimeSVG('#34d399')],['Летучая мышь',batSVG],['Скелет',skeletonSVG]];
+  var n=pool[Math.floor(Math.random()*pool.length)];
+  if(guard)return{name:'Хранитель этажа',svg:slimeSVG('#a855f7'),hp:Math.round((25+f*10)*1.6),dmg:Math.round((4+f*2)*1.3),coins:15+f*4,gems:8+f};
+  if(mode==='mine')return{name:n[0]+' ур.'+run.wave,svg:n[1],hp:25+run.wave*9,dmg:4+run.wave*2,coins:8+run.wave*5};
+  return{name:n[0],svg:n[1],hp:25+f*10,dmg:4+f*2,coins:6+f*3}}
+function arenaEnemy(){var r=S.rating||0;return{name:'Соперник (рейтинг '+r+')',svg:skeletonSVG,hp:60+r*2,dmg:6+r*.4,arena:true}}
+function startBattle(en){
+  clearInterval(walkIv);
+  battle={en:en,hp:en.hp,max:en.hp,pos:0,dir:1,cd:false,potion:false};
+  $('eventBox').innerHTML='';
+  $('enemyWrap').innerHTML=en.svg;$('enemyWrap').style.display='block';
+  $('enName').textContent=en.name;$('btnPot').disabled=false;
+  var w=Math.round(25+Math.random()*30);
+  $('zone').style.left=w+'%';$('zone').style.width='20%';
+  battle.zone=[w,w+20];battle.speed=60+Math.random()*40;
+  $('battleBox').style.display='block';
+  $('heroWrap').classList.remove('walking');
+  updateBars();lastTs=performance.now();
+  cancelAnimationFrame(raf);raf=requestAnimationFrame(timingTick);
+  clearInterval(enIv);enIv=setInterval(enemyTurn,1600)}
+function timingTick(ts){if(!battle)return;
+  var dt=(ts-lastTs)/1000;lastTs=ts;
+  battle.pos+=battle.dir*battle.speed*dt;
+  if(battle.pos>=100){battle.pos=100;battle.dir=-1}
+  if(battle.pos<=0){battle.pos=0;battle.dir=1}
+  $('cursor').style.left=battle.pos+'%';
+  raf=requestAnimationFrame(timingTick)}
+function hitEnemy(){if(!battle||battle.cd)return;
+  battle.cd=true;$('btnHit').disabled=true;
+  var h=HEROES[S.hero];
+  var crit=Math.random()<h.crit||(battle.pos>=battle.zone[0]&&battle.pos<=battle.zone[1]);
+  var dmg=heroDmg()*(crit?2:1);
+  battle.hp-=dmg;
+  floatText('enemyWrap',(crit?'КРИТ! ':'')+'-'+dmg,crit?'#fde047':'#fff');
+  $('enemyWrap').classList.add('hit');setTimeout(function(){$('enemyWrap').classList.remove('hit')},250);
+  updateBars();
+  if(battle.hp<=0){winBattle();return}
+  setTimeout(function(){battle.cd=false;if(battle)$('btnHit').disabled=false},800)}
+function enemyTurn(){if(!battle)return;
+  var h=HEROES[S.hero];
+  if(Math.random()<h.dodge){floatText('heroWrap','Уворот!','#34d399');return}
+  S.hp-=battle.en.dmg;renderHUD();updateBars();
+  $('heroWrap').classList.add('hit');setTimeout(function(){$('heroWrap').classList.remove('hit')},250);
+  if(S.hp<=0){S.hp=0;heroDeath()}}
+function usePotion(){if(!battle||battle.potion)return;
+  if(S.gems<5)return toast('Нужно 5 кристаллов за зелье');
+  S.gems-=5;battle.potion=true;S.hp=Math.min(maxHP(),S.hp+30);
+  $('btnPot').disabled=true;updateBars();renderHUD();save();floatText('heroWrap','+30','#34d399')}
+function flee(){if(!battle||battle.en.arena)return;endBattle();toast('Ты отступил, добыча при тебе');beginWalk()}
+function winBattle(){
+  var en=battle.en;clearInterval(enIv);cancelAnimationFrame(raf);
+  if(en.arena){S.rating=(S.rating||0)+15;S.wins++;S.gems+=5;save();renderHUD();toast('Победа! +15 рейтинга, +5 кристаллов');setTimeout(goCamp,900);return}
+  S.gold+=en.coins||0;if(en.gems)S.gems+=en.gems;renderHUD();save();
+  toast(en.name+' повержен! +'+en.coins+' золота'+(en.gems?', +'+en.gems+' кристаллов':''));
+  setTimeout(beginWalk,800)}
+function endBattle(){clearInterval(enIv);cancelAnimationFrame(raf);battle=null;$('battleBox').style.display='none';$('enemyWrap').style.display='none'}
+function heroDeath(){
+  endBattle();
+  if(mode==='mine'){toast('Волна '+run.wave+' не покорилась, но вся добыча цела');S.hp=maxHP();save();setTimeout(goCamp,600);return}
+  if(mode==='arena'){S.rating=Math.max(0,(S.rating||0)-5);save();toast('Поражение на арене. Рейтинг −5');S.hp=maxHP();setTimeout(goCamp,600);return}
+  modal('<h3>Ты пал на этаже '+S.floor+'</h3><p class="small" style="margin:10px 0">Хранители заберут треть рюкзака, если не воскреснуть.</p><button class="btn p" onclick="reviveAd()">📺 Воскреснуть (реклама)</button><button class="btn d" onclick="giveUp()">Потерять 30% и в лагерь</button>')}
+function reviveAd(){watchAd(function(){S.hp=maxHP();save();closeModal();toast('Воскрес!');beginWalk()})}
+function giveUp(){S.bag.wood=Math.floor(S.bag.wood*.7);S.bag.stone=Math.floor(S.bag.stone*.7);S.hp=maxHP();save();closeModal();goCamp();toast('−30% рюкзака. Бывает!')}
+function floatText(anchor,txt,color){
+  var a=$(anchor);if(!a)return;
+  var f=document.createElement('div');f.className='float';f.textContent=txt;f.style.color=color||'#fff';
+  f.style.left=(a.offsetLeft+a.offsetWidth/2-14)+'px';f.style.top=(a.offsetTop-6)+'px';
+  $('sceneCard').appendChild(f);setTimeout(function(){f.remove()},1000)}
+function updateBars(){if(!battle)return;
+  $('enHp').style.width=Math.max(0,battle.hp/battle.max*100)+'%';
+  $('enHpTxt').textContent=Math.max(0,battle.hp)+'/'+battle.max;
+  $('hpBar').style.width=Math.max(0,S.hp/maxHP()*100)+'%';
+  $('hpTxt').textContent=Math.max(0,S.hp)+'/'+maxHP()}
+function stopRun(){clearInterval(walkIv);if(battle)endBattle();run=null}
+
+/* ---------- реклама ---------- */
+function watchAd(fn){
+  if(S.adFree||typeof Ads==='undefined'){toast('Тест-режим: награда выдана сразу');fn();return}
+  try{Ads.controller(AD_BLOCK_ID).show().then(fn).catch(function(){toast('Реклама недоступна, попробуй позже')})}catch(e){toast('Тест-режим: награда выдана сразу');fn()}}
+
+/* ---------- обучение ---------- */
+function showTutorial(){tutStep=0;tutDraw()}
+function tutDraw(){
+  var steps=[
+   'Ты — искатель приключений. Герой идёт вниз сам: твоя задача — решать, что делать с находками на каждом этаже.',
+   'На жилах тапай «Копать» — за каждый удар получаешь золото и камень. Сундуки дают золото и кристаллы.',
+   'На врагах — бой: ударь, когда курсор в зелёной зоне, будет крит ×2. Зелье лечит, побег сохраняет добычу. Удачи!'];
+  modal('<h3>Добро пожаловать в подземелье</h3><p style="margin:12px 0">'+steps[tutStep]+'</p><div class="dots" style="justify-content:center">'+steps.map(function(_,j){return '<div class="dot'+(j===tutStep?' on':'')+'"></div>'}).join('')+'</div><button class="btn" onclick="tutNext()">'+(tutStep<2?'Дальше →':'⛏ В путь!')+'</button>')}
+function tutNext(){tutStep++;if(tutStep<3)tutDraw();else{S.tut=true;save();closeModal();beginWalk()}}
+
+/* ---------- старт ---------- */
+['hud','sc-camp','sc-dun','scene','heroWrap','sceneCard','hpBar','hpTxt','battleBox','eventBox','navCamp','navDun','modalBg','modalBox','toast'].forEach(function(id){
+  if(!$(id))throw new Error('В файле нет элемента #'+id+' — код вставился не целиком');
+});
+$('scene').innerHTML=sceneSVG;
+$('heroWrap').innerHTML=heroSVG(HEROES[S.hero].color);
+S.hp=Math.min(S.hp||maxHP(),maxHP());
+renderHUD();renderCamp();
+}catch(e){
+  var el=document.getElementById('errlog');
+  if(el)el.textContent='ОШИБКА СТАРТА: '+e.message;
+}
+</script>
+</body>
+</html>
