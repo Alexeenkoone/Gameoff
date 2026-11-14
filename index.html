@@ -1,688 +1,605 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Тихая Гавань</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="color-scheme" content="dark">
+<title>Подземный Магнат</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(180deg, #1B2A41 0%, #2a3a55 100%);
-    color: #E8D5B7;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  body { display: flex; justify-content: center; }
-  #app { width: 100%; max-width: 480px; min-height: 100vh; padding: 12px; }
-
-  /* ==== BASE VIEW ==== */
-  .base-view { display: flex; flex-direction: column; gap: 14px; }
-  .header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 12px 16px;
-    background: rgba(201, 162, 39, 0.1);
-    border: 1px solid rgba(201, 162, 39, 0.3);
-    border-radius: 12px;
-  }
-  .resources { display: flex; align-items: baseline; gap: 8px; font-size: 22px; font-weight: 600; width: 100%; }
-  .res-icon { font-size: 20px; }
-  #res-count { color: #C9A227; min-width: 40px; display: inline-block; }
-  .res-rate { font-size: 12px; opacity: 0.7; margin-left: auto; }
-
-  .tap-zone { display: flex; justify-content: center; padding: 8px 0; }
-  .tap-btn {
-    width: 160px; height: 160px; border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, #C9A227, #8B6f14);
-    border: 3px solid #E8D5B7;
-    color: #1B2A41;
-    font-family: inherit; font-weight: 700;
-    cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 4px;
-    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3), 0 0 30px rgba(201, 162, 39, 0.3);
-    transition: transform 0.08s ease;
-    animation: pulse 2.4s ease-in-out infinite;
-  }
-  .tap-btn:active { transform: scale(0.94) translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
-  .tap-emoji { font-size: 32px; }
-  .tap-label { font-size: 13px; text-align: center; padding: 0 8px; line-height: 1.2; }
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 6px 0 rgba(0,0,0,0.3), 0 0 30px rgba(201, 162, 39, 0.3); }
-    50% { box-shadow: 0 6px 0 rgba(0,0,0,0.3), 0 0 50px rgba(201, 162, 39, 0.6); }
-  }
-
-  .section-title {
-    font-size: 13px; text-transform: uppercase; letter-spacing: 1px;
-    color: #C9A227; opacity: 0.85; padding-left: 4px; margin-top: 4px;
-  }
-
-  .upgrades, .npcs { display: flex; flex-direction: column; gap: 8px; }
-  .upgrade-card {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px; border-radius: 10px;
-    background: rgba(232, 213, 183, 0.05);
-    border: 1px solid rgba(232, 213, 183, 0.15);
-    transition: all 0.2s;
-  }
-  .upgrade-card.affordable { border-color: rgba(201, 162, 39, 0.5); background: rgba(201, 162, 39, 0.08); }
-  .upgrade-card.maxed { opacity: 0.6; }
-  .upg-icon { font-size: 24px; }
-  .upg-info { flex: 1; min-width: 0; }
-  .upg-name { font-size: 14px; font-weight: 600; }
-  .upg-lvl { font-size: 11px; color: #C9A227; font-weight: 400; }
-  .upg-cost { font-size: 12px; opacity: 0.75; margin-top: 2px; }
-  .upg-hint { font-size: 11px; color: #C9A227; margin-top: 3px; font-weight: 500; }
-  .upg-btn {
-    width: 40px; height: 40px; border-radius: 8px;
-    background: #C9A227; color: #1B2A41;
-    border: none; font-size: 22px; font-weight: 700;
-    cursor: pointer; transition: all 0.15s;
-    flex-shrink: 0;
-  }
-  .upg-btn:disabled { background: #555; opacity: 0.5; cursor: not-allowed; }
-  .upg-btn:not(:disabled):active { transform: scale(0.9); }
-
-  .npc-card {
-    display: flex; gap: 12px; align-items: center;
-    padding: 12px; border-radius: 10px;
-    background: rgba(232, 213, 183, 0.05);
-    border: 1px solid rgba(232, 213, 183, 0.15);
-  }
-  .npc-avatar-sm {
-    width: 44px; height: 44px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; border: 2px solid;
-    background: rgba(232, 213, 183, 0.1); flex-shrink: 0;
-  }
-  .npc-info { flex: 1; min-width: 0; }
-  .npc-name-sm { font-size: 14px; font-weight: 600; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
-  .npc-progress { font-size: 11px; color: #C9A227; font-weight: 400; }
-  .locked { font-size: 11px; opacity: 0.5; font-weight: 400; margin-left: 6px; }
-  .trust-bar {
-    height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px;
-    overflow: hidden; margin-bottom: 4px;
-  }
-  .trust-fill { height: 100%; transition: width 0.4s ease; border-radius: 4px; }
-  .trust-val { font-size: 11px; opacity: 0.7; }
-  .trust-hint { font-size: 10px; opacity: 0.5; margin-top: 2px; }
-
-  .final-banner {
-    padding: 16px; border-radius: 12px;
-    background: linear-gradient(135deg, rgba(201, 162, 39, 0.2), rgba(139, 69, 19, 0.2));
-    border: 2px solid #C9A227;
-    text-align: center; font-size: 14px;
-    animation: glow 2s ease-in-out infinite;
-  }
-  @keyframes glow {
-    0%, 100% { box-shadow: 0 0 15px rgba(201,162,39,0.3); }
-    50% { box-shadow: 0 0 30px rgba(201,162,39,0.6); }
-  }
-  .final-btn {
-    margin-top: 10px; padding: 10px 20px;
-    background: #C9A227; color: #1B2A41;
-    border: none; border-radius: 8px;
-    font-size: 14px; font-weight: 700; cursor: pointer;
-    font-family: inherit;
-  }
-  .final-btn:active { transform: scale(0.96); }
-
-  /* ==== SCENE VIEW ==== */
-  .scene-view {
-    display: flex; flex-direction: column; min-height: calc(100vh - 24px);
-    gap: 16px;
-  }
-  .portrait {
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    padding: 24px 0;
-  }
-  .npc-avatar {
-    width: 120px; height: 120px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 60px; border: 3px solid;
-    background: rgba(232, 213, 183, 0.08);
-    animation: floatIn 0.5s ease;
-  }
-  .npc-avatar.empty { font-size: 50px; border-color: rgba(232, 213, 183, 0.2); }
-  @keyframes floatIn {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  .npc-name { font-size: 18px; font-weight: 700; color: #C9A227; }
-
-  .dialog-box {
-    background: rgba(232, 213, 183, 0.08);
-    border: 1px solid rgba(232, 213, 183, 0.2);
-    border-radius: 16px;
-    padding: 20px;
-    flex: 1;
-    display: flex; flex-direction: column; gap: 16px;
-  }
-  .dialog-text {
-    font-size: 15px; line-height: 1.6;
-    min-height: 80px;
-  }
-  .choices { display: flex; flex-direction: column; gap: 8px; }
-  .choice-btn {
-    padding: 12px 16px;
-    background: rgba(201, 162, 39, 0.15);
-    border: 1px solid rgba(201, 162, 39, 0.4);
-    color: #E8D5B7;
-    border-radius: 10px;
-    font-size: 14px; text-align: left; cursor: pointer;
-    font-family: inherit; line-height: 1.4;
-    transition: all 0.15s;
-  }
-  .choice-btn:active { transform: scale(0.98); background: rgba(201, 162, 39, 0.3); }
-  .choice-btn:hover { background: rgba(201, 162, 39, 0.25); }
-
-  /* ==== ENDING VIEW ==== */
-  .ending-view {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; min-height: calc(100vh - 24px);
-    gap: 24px; text-align: center; padding: 20px;
-  }
-  .ending-title {
-    font-size: 28px; font-weight: 700; color: #C9A227;
-    animation: floatIn 0.8s ease;
-  }
-  .ending-text {
-    font-size: 15px; line-height: 1.7; opacity: 0.9;
-    max-width: 360px;
-    animation: floatIn 1s ease;
-  }
-  .restart-btn {
-    margin-top: 20px; padding: 14px 28px;
-    background: #C9A227; color: #1B2A41;
-    border: none; border-radius: 10px;
-    font-size: 15px; font-weight: 700; cursor: pointer;
-    font-family: inherit;
-  }
-  .restart-btn:active { transform: scale(0.96); }
-
-  /* ==== SCENE PROGRESS ==== */
-  .scene-progress {
-    text-align: center; font-size: 12px; opacity: 0.7;
-    padding: 6px 0;
-  }
-  .scene-progress b { color: #C9A227; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#14161d;color:#e8e6e3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;user-select:none;-webkit-user-select:none;touch-action:manipulation;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+#top{position:sticky;top:0;z-index:20;background:#1b1e28;padding:calc(6px + env(safe-area-inset-top)) 10px 8px;border-bottom:1px solid #2c3143}
+.res{display:flex;gap:6px;flex-wrap:wrap;font-size:13px;align-items:center}
+.res span{background:#262a38;border-radius:8px;padding:4px 8px;white-space:nowrap}
+.res small{color:#8b90a3;font-weight:400}
+#car{display:none;background:#4a3a12;border:1px solid #a8791f}
+#guide{margin-top:6px;font-size:12px;color:#ffd479;background:#33290f;border-radius:8px;padding:5px 8px;display:inline-block}
+#tabs{display:flex;gap:6px;margin-top:8px}
+.tb{flex:1;background:#262a38;border:none;border-radius:10px;color:#c8cbd8;padding:9px 0;font-size:14px;cursor:pointer}
+.tb.on{background:#f5b942;color:#14161d;font-weight:700}
+#view{padding:10px;max-width:520px;margin:0 auto}
+#grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.cell{aspect-ratio:1;border:1px solid #2c3143;border-radius:8px;background:#1b1e28;display:flex;align-items:center;justify-content:center;font-size:20px;position:relative;cursor:pointer;overflow:hidden}
+.cell.b{background:#242a3e;border-color:#3a415c}
+.cell.pend{opacity:.75}
+.lv{position:absolute;bottom:2px;right:4px;font-size:10px;color:#8b90a3}
+.pr{position:absolute;top:2px;left:0;right:0;text-align:center;font-size:10px;color:#7fd4a0}
+.cell.spark{background:radial-gradient(circle,#5a4a12,#241d06);border-color:#f5b942;animation:pulse 1s infinite}
+@keyframes pulse{50%{box-shadow:0 0 12px #f5b942}}
+.fl{position:absolute;top:30%;left:50%;transform:translateX(-50%);font-size:13px;color:#ffd479;pointer-events:none;animation:fly .9s forwards;z-index:5;white-space:nowrap}
+@keyframes fly{to{transform:translate(-50%,-40px);opacity:0}}
+#pal{display:flex;gap:6px;overflow-x:auto;padding:8px 0 4px}
+.pal{min-width:86px;background:#242a3e;border:1px solid #3a415c;border-radius:10px;padding:8px 6px;text-align:center;cursor:pointer;flex-shrink:0}
+.pal.sel{border-color:#f5b942;background:#3a3012}
+.pal .pi{font-size:20px;display:block}
+.pal .pn{font-size:11px;display:block;margin:2px 0}
+.pal .pc{font-size:11px;color:#7fd4a0;display:block}
+.row{background:#1d2130;border:1px solid #2c3143;border-radius:12px;padding:12px;margin-bottom:10px}
+.row h3{font-size:14px;margin-bottom:4px}
+.row .d{font-size:12px;color:#8b90a3}
+.btn{display:block;width:100%;background:#f5b942;color:#14161d;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px}
+.btn.ghost{background:#262a38;color:#c8cbd8}
+.btn.warn{background:#7a3030;color:#ffe3e3}
+.btn[disabled]{opacity:.45}
+.prog{height:6px;background:#2c3143;border-radius:3px;margin-top:6px;overflow:hidden}
+.prog i{display:block;height:100%;background:#7fd4a0}
+.sheet{background:#232839;border-radius:16px 16px 0 0;padding:16px;width:100%;max-width:480px;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+.sh-h{font-size:16px;font-weight:700;margin-bottom:6px}
+.sh-d{font-size:13px;color:#7fd4a0}
+.sh-lore{font-size:12px;color:#8b90a3;font-style:italic;margin:8px 0}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:50}
+#ov.up{align-items:center}
+.mbox{background:#232839;border-radius:16px;padding:18px;width:88%;max-width:420px;text-align:center}
+#toast{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#333a4f;border-radius:10px;padding:9px 14px;font-size:13px;display:none;z-index:60;max-width:90%;text-align:center}
+.gold{border-color:#f5b942;box-shadow:0 0 8px rgba(245,185,66,.35)}
+.mini{font-size:11px;color:#8b90a3}
+h2.sec{font-size:15px;margin:14px 0 8px;color:#f5b942}
+.rlog .re{font-size:12px;padding:6px 8px;border-bottom:1px solid #2c3143}
+.calrow{display:flex;gap:6px;margin-top:8px}
+.calrow .cd{flex:1;text-align:center;background:#242a3e;border:1px solid #3a415c;border-radius:8px;padding:8px 2px;font-size:12px}
+.calrow .cd.got{opacity:.35}
+.calrow .cd.now{border-color:#f5b942}
 </style>
 </head>
 <body>
-<div id="app"></div>
+<div id="top">
+ <div class="res">
+  <span>⛏ <b id="ore">0</b> <small id="rate"></small></span>
+  <span>💠 <b id="ess">0</b></span>
+  <span>⭐ <b id="star">0</b></span>
+  <span>⚡ <b id="spd">0</b></span>
+  <span>💪 <b id="pow">0</b></span>
+  <span id="flv">Этаж 1</span>
+  <span id="car">🛒 ×2</span>
+ </div>
+ <div id="guide"></div>
+ <div id="tabs">
+  <button class="tb on" data-act="tab" data-t="city">🏙 Город</button>
+  <button class="tb" data-act="tab" data-t="raid">⚔️ Поход</button>
+  <button class="tb" data-act="tab" data-t="shop">🛒 Лавка</button>
+  <button class="tb" data-act="tab" data-t="more">📜 Ещё</button>
+ </div>
+</div>
+<div id="view"></div>
+<div id="ov"></div>
+<div id="toast"></div>
 <script>
 'use strict';
 
-const SAVE_KEY = 'quiet_harbor_v2';
-const TAP_GAIN = 5;
-const INCOME_PER_LEVEL = 0.3;
-const OFFLINE_CAP_SEC = 8 * 3600;
-const OFFLINE_RATE = 0.6;
-const START_RESOURCES = 20;
-
-let state = null;
-let tickInterval = null;
-
-const UPGRADES = {
-  bed:       { name: "Кровати",   icon: "🛏️", costs: [15, 40, 90, 200], npc: "mila" },
-  kitchen:   { name: "Кухня",     icon: "🍲", costs: [20, 50, 120, 250], npc: "grisha" },
-  med:       { name: "Медпункт",  icon: "💊", costs: [25, 60, 140, 300], npc: "anya" },
-  generator: { name: "Генератор", icon: "⚡", costs: [30, 80, 180, 400], npc: null }
+var BLD={
+shaft:{n:'Шахта',i:'⛏',c:30,u:1,r:0.5,d:'Добывает руду',lore:'Старые выработки отдают то, что помнят руки копателей.'},
+house:{n:'Дом рудокопа',i:'🏠',c:80,u:1,h:0.05,d:'+5% добычи за каждый',lore:'Дым из трубы — значит, город жив.'},
+wh:{n:'Склад',i:'📦',c:120,u:1,cap:300,d:'+300 к пределу руды',lore:'Руду не сбережёшь — потеряешь.'},
+bar:{n:'Казарма',i:'🛡',c:100,u:1,p:5,d:'+5 к силе отряда',lore:'Здесь учат держать щит даже во сне.'},
+mkt:{n:'Рынок',i:'🏪',c:200,u:1,adj:0.1,d:'+10% за каждую соседнюю шахту',lore:'Торговля — вторая жила глубин.'},
+tower:{n:'Вышка',i:'🗼',c:350,u:2,p:8,d:'+8 к силе отряда',lore:'Отсюда видно, кто идёт из тьмы.'},
+work:{n:'Мастерская',i:'⚒',c:400,u:2,p:15,d:'+15 к силе отряда',lore:'Сталь, закалённая в грибе-пламени.'},
+vault:{n:'Реликварий',i:'🗡',c:600,u:3,relic:0.02,d:'+2% к шансу реликвии',lore:'Память города хранит здесь своё.'},
+forge:{n:'Кузня',i:'🔥',c:800,u:3,r:2,p:3,d:'+2 руды/с и +3 к силе',lore:'Жар из лавовой жилы бьёт в наковальню.'},
+gard:{n:'Грибной сад',i:'🍄',c:1200,u:4,r:5,d:'+5 руды/с',lore:'Светящиеся шапки кормят весь ярус.'},
+obel:{n:'Обелиск',i:'🗿',c:2000,u:4,p:25,d:'+25 к силе отряда',lore:'Он молчит так, что лучше бы кричал.'}
 };
+var RK=['shaft','house','wh','bar','mkt','tower','work','vault','forge','gard','obel'];
 
-const NPCS = {
-  mila:   { name: "Мила",   emoji: "🧣", color: "#C9A227" },
-  grisha: { name: "Гриша",  emoji: "⌚", color: "#8B4513" },
-  anya:   { name: "Аня",    emoji: "🔪", color: "#4A6741" }
-};
+var RELICS=[
+{id:'r1',n:'Пик Глубин',d:'+10% добычи',idle:0.1},
+{id:'r2',n:'Щит Предков',d:'+3 к силе',p:3},
+{id:'r3',n:'Ключ Стволов',d:'+200 к пределу руды',cap:200},
+{id:'r4',n:'Лампа Искателя',d:'+1% к шансу реликвии',relic:0.01},
+{id:'r5',n:'Молот Ярусов',d:'+15% 💠 из походов',ess:0.15},
+{id:'r6',n:'Зеркало Каравана',d:'Искры и караван чаще на 15%',ev:0.15},
+{id:'r7',n:'Костяной Компас',d:'+15% к шансу победы',win:0.15},
+{id:'r8',n:'Печать Ядра',d:'Ядра дают +8% добычи вместо +5%',core:0.08},
+{id:'r9',n:'Слеза Магмы',d:'+25% добычи',idle:0.25},
+{id:'r10',n:'Куб Столкновений',d:'+10% 💠 за победу в походе',raid:0.1}
+];
 
-const SCENES = {
-  intro: {
-    npc: null,
-    text: "Год 2040-й. Семь лет назад Катастрофа разорвала мир.\n\nТы — смотритель убежища. Где-то в долине ещё есть выжившие.\n\nСегодня на пороге появилась первая...",
-    choices: [{ text: "Начать", next: "base" }]
-  },
+var RES=[
+{id:'idle',n:'Глубинная тяга',d:'+10% добычи за уровень',max:10},
+{id:'pow',n:'Тактика отрядов',d:'+2 к силе за уровень',max:10},
+{id:'cap',n:'Хитрые склады',d:'+200 к пределу за уровень',max:10},
+{id:'rel',n:'Чутьё искателя',d:'+1% к шансу реликвии за уровень',max:10},
+{id:'spark',n:'Магнит искр',d:'Искры чаще на 10% за уровень',max:10}
+];
+function resCost(l){return 5*Math.pow(2,l);}
 
-  // ==== MILA ====
-  mila_1: {
-    npc: "mila",
-    text: "Мила стоит на пороге, кутаясь в старый шарф. В глазах — усталость и надежда.\n\n— Я слышала, здесь можно найти приют. У меня больше никого не осталось.",
-    choices: [
-      { text: "«Оставайся. Здесь тепло»", trust: { mila: 15 }, next: "mila_1_good" },
-      { text: "«Что ты умеешь?»", trust: { mila: 5 }, next: "mila_1_neutral" },
-      { text: "«Проходи, но помни: я решаю»", trust: { mila: -10 }, next: "mila_1_hard" }
-    ]
-  },
-  mila_1_good: {
-    npc: "mila",
-    text: "Мила благодарно кивает, и в её глазах загорается что-то похожее на тепло.\n\n— Спасибо. Я буду помогать — на кухне, с детьми, везде.",
-    choices: [{ text: "Продолжить", next: "base" }]
-  },
-  mila_1_neutral: {
-    npc: "mila",
-    text: "— Я умею готовить. И швы накладывать — учил муж. И слушать умею.\n\nОна смотрит прямо, без вызова.\n\n— Больше ничего не обещаю.",
-    choices: [{ text: "Продолжить", next: "base" }]
-  },
-  mila_1_hard: {
-    npc: "mila",
-    text: "— Я помню, кто здесь главный. Только не забудь, что и я не забуду.\n\nОна входит, не глядя на тебя.",
-    choices: [{ text: "Продолжить", next: "base" }]
-  },
-  mila_2: {
-    npc: "mila",
-    text: "Мила сидит у окна с шитьём. За окном — снег.\n\n— Знаешь, я ведь не просто так пришла. Мой сын... он был там, за тоннелем. Я ищу его.",
-    choices: [
-      { text: "«Мы найдём его. Вместе»", trust: { mila: 15 }, next: "base" },
-      { text: "«За тоннель я не пойду. Слишком опасно»", trust: { mila: -15 }, next: "base" },
-      { text: "«Расскажи мне о нём»", trust: { mila: 10 }, next: "base" }
-    ]
-  },
+var RAID=[
+{n:'Обычный',e:8,lo:3,hi:6,rel:0.05,col:'#3b7a57'},
+{n:'Элитный',e:25,lo:8,hi:15,rel:0.10,col:'#a8791f'},
+{n:'Геройский',e:60,lo:20,hi:35,rel:0.20,col:'#8a2b2b'}
+];
 
-  // ==== GRISHA ====
-  grisha_1: {
-    npc: "grisha",
-    text: "Гриша — бывший инженер, потерявший всё. Он пришёл сам, с пустыми руками, но с часами на запястье.\n\n— Слышал, у вас генератор барахлит. Я могу помочь. Только...\n\nОн замолкает.",
-    choices: [
-      { text: "«Только что?»", trust: { grisha: 5 }, next: "grisha_1b" },
-      { text: "«Проходи, не стой на пороге»", trust: { grisha: 15 }, next: "grisha_1_good" },
-      { text: "«С чего мне тебе верить?»", trust: { grisha: -10 }, next: "grisha_1_hard" }
-    ]
-  },
-  grisha_1b: {
-    npc: "grisha",
-    text: "— Только не спрашивай, что я делал до этого. Я не горжусь.\n\nОн смотрит в пол, и в его глазах — что-то тяжёлое.",
-    choices: [
-      { text: "«Каждый заслуживает второго шанса»", trust: { grisha: 10 }, next: "base" },
-      { text: "«Расскажешь — останешься»", trust: { grisha: -5 }, next: "base" }
-    ]
-  },
-  grisha_1_good: {
-    npc: "grisha",
-    text: "Гриша входит, и что-то в его плечах расслабляется.\n\n— Спасибо. Я починю генератор к утру. Считай, это мой вклад.",
-    choices: [{ text: "Продолжить", next: "base" }]
-  },
-  grisha_1_hard: {
-    npc: "grisha",
-    text: "— Правильно. Верить незнакомцам — глупо. Но и не верить совсем — тоже.\n\nОн входит, но держится в стороне.",
-    choices: [{ text: "Продолжить", next: "base" }]
-  },
-  grisha_2: {
-    npc: "grisha",
-    text: "Гриша сидит у генератора, крутит гайку.\n\n— Смотритель. Тогда, семь лет назад... я был там, где всё началось. И я мог остановить. Не остановил.",
-    choices: [
-      { text: "«Это прошлое. Ты здесь и сейчас»", trust: { grisha: 20 }, next: "base" },
-      { text: "«Значит, ты виноват»", trust: { grisha: -20 }, next: "base" },
-      { text: "«Расскажи, что ты видел»", trust: { grisha: 10 }, next: "base" }
-    ]
-  },
+var ACH=[
+{id:'a1',n:'Первая шахта',d:'Построй шахту'},
+{id:'a2',n:'Первая победа',d:'Выиграй поход'},
+{id:'a3',n:'Добытчик',d:'1000 руды за всё время'},
+{id:'a4',n:'Этаж 2',d:'Поднимись на второй этаж'},
+{id:'a5',n:'Пять побед',d:'5 побед в походах'},
+{id:'a6',n:'Первая реликвия',d:'Найди реликвию'},
+{id:'a7',n:'Десять построек',d:'10 зданий в городе'},
+{id:'a8',n:'Стрик 3',d:'Заходи 3 дня подряд'},
+{id:'a9',n:'Этаж 5',d:'Поднимись на пятый этаж'},
+{id:'a10',n:'Погружение',d:'Соверши первое Погружение'}
+];
+function achOk(id){
+ var c=countOf;
+ if(id==='a1')return c('shaft')>0;
+ if(id==='a2')return S.raidWins>=1;
+ if(id==='a3')return S.totalOre>=1000;
+ if(id==='a4')return S.floor>=2;
+ if(id==='a5')return S.raidWins>=5;
+ if(id==='a6')return Object.keys(S.relic).length>=1;
+ if(id==='a7')return Object.keys(S.grid).length>=10;
+ if(id==='a8')return S.streak.n>=3;
+ if(id==='a9')return S.floor>=5;
+ if(id==='a10')return S.prestige>=1;
+ return false;
+}
 
-  // ==== ANYA ====
-  anya_1: {
-    npc: "anya",
-    text: "Аня пришла ночью, с ножом за поясом и без единого слова. Она молча стоит у входа.\n\n— ...\n\nОна не говорит.",
-    choices: [
-      { text: "«Ты можешь остаться»", trust: { anya: 15 }, next: "anya_1_good" },
-      { text: "«Сначала отдай нож»", trust: { anya: -15 }, next: "anya_1_hard" },
-      { text: "Молча кивнуть в сторону свободной койки", trust: { anya: 10 }, next: "anya_1_neutral" }
-    ]
-  },
-  anya_1_good: {
-    npc: "anya",
-    text: "Она смотрит долго. Потом кивает — один раз.\n\n— Аня.\n\nВсё. Больше она ничего не скажет сегодня.",
-    choices: [{ text: "Продолжить", next: "base" }]
-  },
-  anya_1_hard: {
-    npc: "anya",
-    text: "Она сжимает рукоять, но потом медленно вынимает нож и кладёт его на стол.\n\n— Пока. Заберу, когда пойму, что здесь безопасно.",
-    choices: [{ text: "Продолжить", next: "base" }]
-  },
-  anya_1_neutral: {
-    npc: "anya",
-    text: "Она проходит мимо тебя и садится на койку. Через минуту уже спит — или делает вид.",
-    choices: [{ text: "Продолжить", next: "base" }]
-  },
-  anya_2: {
-    npc: "anya",
-    text: "Аня стоит у окна. За её спиной — нож, теперь уже привычно.\n\n— Ты знаешь, почему я пришла? Потому что слышала: здесь не спрашивают. Просто... дают место.",
-    choices: [
-      { text: "«Правда. Ты здесь своя»", trust: { anya: 20 }, next: "base" },
-      { text: "«Место нужно заслужить»", trust: { anya: -15 }, next: "base" },
-      { text: "«Ты уже заслужила»", trust: { anya: 15 }, next: "base" }
-    ]
-  },
+var SHOP=[
+{id:'offer',i:'🎁',n:'Стартовый оффер',pr:49,d:'+5 ускорений и 1000 руды',once:true},
+{id:'set',i:'🧱',n:'Набор строителя',pr:99,d:'+5 ускорений и 500 руды'},
+{id:'chest',i:'💎',n:'Сундук зодчего',pr:199,d:'+15 ускорений и 30 💠'},
+{id:'pack',i:'📅',n:'Пак на месяц',pr:499,d:'+25% добычи на 30 дней'},
+{id:'skin',i:'🎨',n:'Облик города',pr:299,d:'Золотая рамка города',cosm:true}
+];
 
-  // ==== FINAL ====
-  final: {
-    npc: null,
-    text: "Прошло несколько недель. Убежище живёт. Но приближается зима, и нужно решить, как жить дальше.\n\nТы собираешь всех на совет. Впереди — твой выбор.",
-    choices: [
-      { text: "«Мы одна семья. Все равны»", ending: "savior" },
-      { text: "«Я уйду за тоннель. Один»", ending: "loner" },
-      { text: "«Порядок важнее. Я решаю — вы подчиняетесь»", ending: "tyrant" }
-    ]
-  },
+function calReward(n){
+ var arr=[{o:100},{o:200},{e:5},{s:20},{o:500},{e:10},{s:50}];
+ return arr[n%7];
+}
 
-  // ==== ENDINGS ====
-  ending_savior: {
-    npc: null, ending: true,
-    title: "🌅 Спаситель",
-    text: "Ты выбрал общину. Все остались. Мила нашла сына весной — Гриша и Аня пошли с ней за тоннель.\n\nУбежище стало домом. Не идеальным — но живым.\n\nТы не спас мир. Ты спас этих троих. Этого достаточно."
-  },
-  ending_loner: {
-    npc: null, ending: true,
-    title: "🚶 Одиночка",
-    text: "Ты ушёл за тоннель один. Никто не остановил — каждый сделал свой выбор.\n\nГоворят, ты нашёл другой лагерь. Говорят, ты вернулся. Говорят, ты погиб.\n\nПравду знаешь только ты. И её ты унёс с собой."
-  },
-  ending_tyrant: {
-    npc: null, ending: true,
-    title: "👑 Тиран",
-    text: "Ты установил порядок. Жёсткий, но работающий. Никто не голодает — потому что никто не спорит.\n\nМила больше не поёт. Гриша молчит. Аня смотрит волком.\n\nУбежище выжило. Но что-то важное в нём умерло."
+function def(){return{
+ore:150,ess:0,star:100,spd:0,cores:0,
+grid:{},floor:1,wins:0,raidWins:0,raids:0,
+totalOre:0,last:Date.now(),
+guide:0,seen:{},
+tasks:{day:dayKey(),tOre:0,tBuild:0,tRaid:0,col:false},
+cal:{day:dayKey(),n:0,taken:false},
+streak:{day:dayKey(),n:0},
+relic:{},ach:{},
+res:{idle:0,pow:0,cap:0,rel:0,spark:0},
+cool:0,sparkIdx:-1,sparkEnd:0,sparkAt:Date.now()+180000,carEnd:0,carAt:Date.now()+300000,
+packEnd:0,skin:false,prestige:0,offer:false,
+code:'MAG-'+(1000+Math.floor(Math.random()*9000)),
+log:[]
+};}
+function dayKey(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function load(){try{var raw=localStorage.getItem('magnat3');if(raw){var o=JSON.parse(raw);var d=def();for(var k in d){if(!(k in o))o[k]=d[k];}return o;}}catch(e){}return def();}
+var S=load();
+function save(){try{localStorage.setItem('magnat3',JSON.stringify(S));}catch(e){}}
+setInterval(save,5000);
+window.addEventListener('beforeunload',save);
+
+function countOf(k){var n=0;for(var i in S.grid){if(S.grid[i].k===k)n++;}return n;}
+function relicSum(f){var v=0;for(var i=0;i<RELICS.length;i++){if(S.relic[RELICS[i].id]&&RELICS[i][f])v+=RELICS[i][f];}return v;}
+function bCost(k){return BLD[k].c;}
+function upCost(c){var b=BLD[c.k];return Math.round(b.c*0.8*Math.pow(1.6,c.lvl));}
+function corePct(){return relicSum('core')>0?0.08:0.05;}
+function prodRate(){
+ var base=0;
+ for(var i in S.grid){var c=S.grid[i];if(!c.done)continue;var b=BLD[c.k];if(b.r)base+=b.r*c.lvl;}
+ var m=1;
+ m*=1+countOf('house')*0.05+S.res.idle*0.1+relicSum('idle');
+ var adj=0;
+ for(var idx in S.grid){var c2=S.grid[idx];if(!(c2.done&&BLD[c2.k].adj))continue;
+  var x=idx%6,y=Math.floor(idx/6);
+  var dirs=[[1,0],[-1,0],[0,1],[0,-1]];
+  for(var d=0;d<4;d++){var nx=x+dirs[d][0],ny=y+dirs[d][1];if(nx<0||nx>5||ny<0||ny>5)continue;
+   var nb=S.grid[ny*6+nx];if(nb&&nb.done&&BLD[nb.k].r)adj+=BLD[c2.k].adj;}
+ }
+ m*=1+adj;
+ m*=1+S.cores*corePct();
+ var now=Date.now();
+ if(S.carEnd>now)m*=2;
+ if(S.packEnd>now)m*=1.25;
+ return base*m;
+}
+function capTotal(){return 500+countOf('wh')*300+S.res.cap*200+relicSum('cap');}
+function power(){return countOf('bar')*5+countOf('tower')*8+countOf('work')*15+countOf('obel')*25+countOf('forge')*3+S.res.pow*2+relicSum('p');}
+function mmss(ms){ms=Math.max(0,ms);var m=Math.floor(ms/60000),s=Math.floor(ms%60000/1000);return m+':'+(s<10?'0':'')+s;}
+function fmt(n){n=Math.floor(n);if(n>=1000000)return (n/1000000).toFixed(1)+'M';if(n>=10000)return (n/1000).toFixed(1)+'k';return n;}
+
+var AC=null;
+function beep(f,d){try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.value=f;g.gain.value=0.07;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+(d||0.1));o.stop(AC.currentTime+(d||0.1));}catch(e){}}
+var tt=null;
+function toast(t){var e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(tt);tt=setTimeout(function(){e.style.display='none';},2200);}
+function showSheet(html,centered){var o=$('#ov');o.innerHTML=html;o.style.display='flex';if(centered)o.classList.add('up');else o.classList.remove('up');}
+function hideSheet(){$('#ov').style.display='none';}
+
+function tick(){
+ var now=Date.now();
+ var dt=Math.min((now-S.last)/1000,14400);
+ S.last=now;
+ if(dt>0&&prodRate()>0){
+  var p=prodRate()*dt;var room=capTotal()-S.ore;
+  var real=Math.min(p,Math.max(0,room));
+  if(real>0){S.ore+=real;S.totalOre+=real;S.tasks.tOre+=real;}
+ }
+ var done=false;
+ for(var i in S.grid){var c=S.grid[i];if(!c.done&&now>=c.t){c.done=true;done=true;toast('🏗 '+BLD[c.k].n+' построено');beep(520,0.15);}}
+ if(S.sparkIdx<0&&now>=S.sparkAt)placeSpark();
+ if(S.sparkIdx>=0&&now>S.sparkEnd){S.sparkIdx=-1;S.sparkAt=now+(180000+Math.random()*120000)/(1+S.res.spark*0.1+relicSum('ev')*0.15);if(TAB==='city')renderView();}
+ if(S.carEnd&&now>=S.carEnd)S.carEnd=0;
+ if(now>=S.carAt){S.carEnd=now+60000;S.carAt=now+(300000+Math.random()*240000)*(1-relicSum('ev')*0.15);toast('🛒 Караван: добыча ×2 на минуту!');beep(700,0.15);}
+ if(S.tasks.day!==dayKey())S.tasks={day:dayKey(),tOre:0,tBuild:0,tRaid:0,col:false};
+ if(S.cal.day!==dayKey()){
+  var y=new Date();y.setDate(y.getDate()-1);
+  var yk=y.getFullYear()+'-'+(y.getMonth()+1)+'-'+y.getDate();
+  if(S.cal.day===yk)S.streak.n++;else S.streak.n=1;
+  if(S.cal.n>=7)S.cal.n=0;
+  S.cal.day=dayKey();S.cal.taken=false;
+ }
+ checkGuide();checkAch();
+}
+function placeSpark(){
+ var empty=[];for(var i=0;i<36;i++)if(!S.grid[i])empty.push(i);
+ if(!empty.length)return;
+ S.sparkIdx=empty[Math.floor(Math.random()*empty.length)];
+ S.sparkEnd=Date.now()+20000;
+ if(TAB==='city')renderView();
+}
+function tapSpark(i){
+ if(i!==S.sparkIdx)return;
+ var roll=Math.random(),txt;
+ if(roll<0.6){var v=Math.max(20,Math.round(prodRate()*60));S.ore=Math.min(capTotal(),S.ore+v);txt='+'+v+' ⛏';}
+ else if(roll<0.9){S.ess+=2;txt='+2 💠';}
+ else{S.star+=5;txt='+5 ⭐';}
+ floatNum(i,txt);beep(1200,0.1);
+ S.sparkIdx=-1;
+ S.sparkAt=Date.now()+(180000+Math.random()*120000)/(1+S.res.spark*0.1+relicSum('ev')*0.15);
+ renderAll();
+}
+
+var GUIDE=[
+{n:'Построй Шахту ⛏ (тапни по клетке)',chk:function(){return countOf('shaft')>0;},rw:function(){S.ore+=100;}},
+{n:'Построй Склад 📦',chk:function(){return countOf('wh')>0;},rw:function(){S.ore+=100;}},
+{n:'Построй Казарму 🛡',chk:function(){return countOf('bar')>0;},rw:function(){S.ess+=3;}},
+{n:'Выиграй поход на вкладке ⚔️',chk:function(){return S.raidWins>0;},rw:function(){S.ore+=200;S.ess+=3;}},
+{n:'Поднимись на этаж 2 (5 побед)',chk:function(){return S.floor>=2;},rw:function(){S.ess+=10;S.star+=25;}}
+];
+function checkGuide(){
+ if(S.guide>=GUIDE.length)return;
+ var g=GUIDE[S.guide];
+ if(g.chk()){g.rw();S.guide++;toast('✅ Гайд выполнен — награда твоя!');beep(880,0.2);}
+}
+
+function goRaid(l){
+ var now=Date.now();
+ if(now<S.cool){toast('Отряд ещё в пути: '+mmss(S.cool-now));return;}
+ S.cool=now+90000;S.raids++;
+ var e=RAID[l].e,P=power();
+ var p=Math.max(0.05,Math.min(0.95,P/(P+e)));
+ p=Math.min(0.97,p*(1+relicSum('win')*0.15));
+ if(Math.random()<p){
+  var g=Math.round((RAID[l].lo+Math.random()*(RAID[l].hi-RAID[l].lo))*(1+relicSum('ess')*0.15));
+  S.ess+=g;S.raidWins++;S.tasks.tRaid++;
+  var rc=RAID[l].rel+S.res.rel*0.01+relicSum('relic')+countOf('vault')*0.02;
+  var relTxt='';
+  if(Math.random()<rc){
+   var avail=[];for(var i=0;i<RELICS.length;i++)if(!S.relic[RELICS[i].id])avail.push(RELICS[i]);
+   if(avail.length){var r=avail[Math.floor(Math.random()*avail.length)];S.relic[r.id]=1;relTxt=' 🗡 '+r.n;}
   }
-};
-
-function defaultState() {
-  return {
-    view: "intro",
-    scene: "intro",
-    resources: START_RESOURCES,
-    totalResources: 0,
-    upgrades: { bed: 0, kitchen: 0, med: 0, generator: 0 },
-    npcs: {
-      mila:   { recruited: false, trust: 50, scenesPlayed: 0 },
-      grisha: { recruited: false, trust: 50, scenesPlayed: 0 },
-      anya:   { recruited: false, trust: 50, scenesPlayed: 0 }
-    },
-    lastTick: Date.now(),
-    finalAvailable: false
-  };
+  S.log.unshift('🏆 '+RAID[l].n+': +'+g+' 💠'+relTxt);
+  toast('🏆 Победа! +'+g+' 💠'+relTxt);
+  beep(660,0.12);setTimeout(function(){beep(880,0.12);},120);setTimeout(function(){beep(1100,0.2);},240);
+ }else{
+  var lose=Math.round(S.ess*(0.10+Math.random()*0.05));S.ess-=lose;
+  S.log.unshift('💀 '+RAID[l].n+': −'+lose+' 💠');
+  toast('💀 Отряд разбит. −'+lose+' 💠');
+  beep(220,0.3);
+ }
+ S.log=S.log.slice(0,6);
+ var f=Math.min(10,1+Math.floor(S.raidWins/5));
+ if(f>S.floor){S.floor=f;toast('⬆ Новый этаж: '+f+'! Открыты новые здания');beep(520,0.15);setTimeout(function(){beep(780,0.25);},150);}
+ checkGuide();checkAch();save();renderAll();
 }
-
-function save() {
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {}
+function checkAch(){
+ for(var i=0;i<ACH.length;i++){var a=ACH[i];
+  if(!S.ach[a.id]&&achOk(a.id)){S.ach[a.id]=1;S.star+=10;toast('🏅 Достижение: '+a.n+' (+10 ⭐)');beep(980,0.2);}
+ }
 }
-
-function load() {
-  try {
-    const s = localStorage.getItem(SAVE_KEY);
-    if (s) return JSON.parse(s);
-  } catch (e) {}
-  return null;
+function tryBuild(i){
+ if(!sel)return;
+ var b=BLD[sel];
+ if(S.ore<bCost(sel)){toast('Не хватает руды: нужно '+bCost(sel));beep(200,0.15);return;}
+ S.ore-=bCost(sel);
+ S.grid[i]={k:sel,lvl:1,done:false,t:Date.now()+45000,dur:45000};
+ sel=null;S.tasks.tBuild++;
+ toast('🏗 Стройка началась');
+ beep(300,0.12);setTimeout(function(){beep(420,0.15);},120);
+ checkAch();checkGuide();save();renderAll();
 }
-
-function getTotalRate() {
-  let r = 0;
-  for (const k in state.upgrades) r += state.upgrades[k] * INCOME_PER_LEVEL;
-  return r;
+function openSheet(i){
+ var c=S.grid[i],b=BLD[c.k];
+ var up=upCost(c);
+ var html='<div class="sheet"><div class="sh-h">'+b.i+' '+b.n+' · ур. '+c.lvl+'</div><div class="sh-d">'+effTxt(c)+'</div><div class="sh-lore">'+b.lore+'</div>';
+ html+='<button class="btn" data-act="upg" data-i="'+i+'">Улучшить — '+up+' ⛏</button>';
+ if(!c.done&&S.spd>0)html+='<button class="btn ghost" data-act="spd" data-i="'+i+'">⚡ Ускорить стро́йку (1)</button>';
+ html+='<button class="btn warn" data-act="rm" data-i="'+i+'">Снести (+50% руды)</button>';
+ html+='<button class="btn ghost" data-act="close">Закрыть</button></div>';
+ showSheet(html);
 }
-
-function totalScenes() {
-  return state.npcs.mila.scenesPlayed + state.npcs.grisha.scenesPlayed + state.npcs.anya.scenesPlayed;
+function effTxt(c){
+ var b=BLD[c.k];
+ if(b.r)return '+'+(b.r*c.lvl).toFixed(1)+' руды/с';
+ if(b.p)return '+'+(b.p*c.lvl)+' к силе';
+ if(b.cap)return '+'+(b.cap*c.lvl)+' к пределу';
+ if(b.h)return '+'+Math.round(b.h*c.lvl*100)+'% добычи';
+ if(b.adj)return '+10% за соседнюю шахту';
+ if(b.relic)return '+'+(b.relic*100).toFixed(0)+'% к шансу реликвии';
+ return '';
 }
-
-function checkFinalAvailable() {
-  const all = state.npcs.mila.scenesPlayed >= 2
-           && state.npcs.grisha.scenesPlayed >= 2
-           && state.npcs.anya.scenesPlayed >= 2;
-  state.finalAvailable = all;
+function floatNum(i,txt){
+ var cell=document.querySelector('.cell[data-i="'+i+'"]');
+ if(!cell)return;
+ var d=document.createElement('div');d.className='fl';d.textContent=txt;cell.appendChild(d);
+ setTimeout(function(){d.remove();},900);
 }
-
-function init() {
-  const saved = load();
-  state = saved || defaultState();
-
-  if (saved) {
-    const dt = Math.min((Date.now() - (state.lastTick || Date.now())) / 1000, OFFLINE_CAP_SEC);
-    const rate = getTotalRate();
-    if (rate > 0 && dt > 60) {
-      state.resources += Math.floor(rate * dt * OFFLINE_RATE);
-    }
+function buyRes(id){
+ var lvl=S.res[id];if(lvl>=10){toast('Максимум');return;}
+ var c=resCost(lvl);
+ if(S.ess<c){toast('Нужно '+c+' 💠');beep(200,0.15);return;}
+ S.ess-=c;S.res[id]++;beep(760,0.12);save();renderAll();
+}
+function takeCal(){
+ if(S.cal.taken){toast('Уже получено сегодня');return;}
+ var r=calReward(S.cal.n);
+ var mult=1+Math.min(S.streak.n,7)*0.05;
+ var parts=[];
+ if(r.o){var v=Math.round(r.o*mult);S.ore=Math.min(capTotal(),S.ore+v);parts.push('+'+v+' ⛏');}
+ if(r.e){var v2=Math.round(r.e*mult);S.ess+=v2;parts.push('+'+v2+' 💠');}
+ if(r.s){S.star+=r.s;parts.push('+'+r.s+' ⭐');}
+ S.cal.taken=true;S.cal.n++;
+ toast('🎁 Награда дня: '+parts.join(', '));
+ beep(600,0.15);save();renderAll();
+}
+function collectTasks(){
+ if(S.tasks.col){toast('Уже получено');return;}
+ if(S.tasks.tOre<200||S.tasks.tBuild<2||S.tasks.tRaid<1){toast('Задания ещё не выполнены');return;}
+ S.tasks.col=true;S.ess+=5;S.star+=15;
+ toast('✅ Задания дня: +5 💠, +15 ⭐');
+ beep(800,0.18);save();renderAll();
+}
+function buy(id){
+ if(id==='offer'&&S.offer){toast('Уже куплено');return;}
+ if(id==='skin'&&S.skin){toast('Уже куплено');return;}
+ for(var i=0;i<SHOP.length;i++){
+  if(SHOP[i].id!==id)continue;
+  var it=SHOP[i];
+  if(S.star<it.pr){toast('Не хватает ⭐');beep(200,0.15);return;}
+  S.star-=it.pr;
+  if(id==='offer'){S.spd+=5;S.ore=Math.min(capTotal(),S.ore+1000);S.offer=true;}
+  if(id==='set'){S.spd+=5;S.ore=Math.min(capTotal(),S.ore+500);}
+  if(id==='chest'){S.spd+=15;S.ess+=30;}
+  if(id==='pack'){S.packEnd=Date.now()+30*86400000;}
+  if(id==='skin'){S.skin=true;}
+  toast('🛍 Куплено: '+it.n);
+  beep(700,0.15);
+ }
+ save();renderAll();
+}
+function prestige(){
+ if(S.floor<5){toast('Погружение откроется с 5-го этажа');return;}
+ var gain=S.floor*5;
+ if(!confirm('Погружение сбросит город, но даст '+gain+' ядер (+3% добычи каждый). Реликвии и ⭐ сохранятся. Продолжить?'))return;
+ var keep={star:S.star,cores:S.cores+gain,prestige:S.prestige+1,relic:S.relic,ach:S.ach,skin:S.skin,offer:S.offer,code:S.code};
+ S=def();
+ S.star=keep.star;S.cores=keep.cores;S.prestige=keep.prestige;S.relic=keep.relic;S.ach=keep.ach;S.skin=keep.skin;S.offer=keep.offer;S.code=keep.code;
+ save();renderAll();
+ toast('🌀 Погружение! +'+gain+' ядер');
+}
+function share(){
+ var txt='Мой подземный город — этаж '+S.floor+', сила отряда '+power()+'. Присоединяйся! Код: '+S.code;
+ try{
+  if(TG&&TG.HapticFeedback)TG.HapticFeedback.impactOccurred('light');
+ }catch(e){}
+ if(navigator.share){navigator.share({text:txt}).catch(function(){});}
+ else if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){toast('Скопировано');});}
+ else toast(txt);
+}
+function offline(){
+ var now=Date.now();var dt=(now-S.last)/1000;
+ if(dt>60&&prodRate()>0){
+  var gain=Math.min(dt,14400)*prodRate();
+  gain=Math.min(gain,Math.max(0,capTotal()-S.ore));
+  if(gain>1){
+   S.ore+=gain;S.totalOre+=gain;
+   showSheet('<div class="mbox"><div class="sh-h">⏰ С возвращением!</div><div class="sh-d">Пока тебя не было ('+Math.round(Math.min(dt,14400)/60)+' мин), город добыл '+Math.floor(gain)+' руды.</div><button class="btn" data-act="close">Отлично</button></div>',true);
   }
-
-  state.lastTick = Date.now();
-  render();
-  startTick();
+ }
+ S.last=now;
 }
 
-function startTick() {
-  if (tickInterval) clearInterval(tickInterval);
-  tickInterval = setInterval(() => {
-    const now = Date.now();
-    const dt = (now - state.lastTick) / 1000;
-    state.lastTick = now;
-    const gain = getTotalRate() * dt;
-    if (gain > 0 && state.view === "base") {
-      state.resources += gain;
-      const el = document.getElementById("res-count");
-      if (el) el.textContent = Math.floor(state.resources);
-    } else {
-      state.resources += gain;
-    }
-    save();
-  }, 1000);
+var TAB='city',sel=null;
+function setTab(t){TAB=t;document.querySelectorAll('.tb').forEach(function(b){b.classList.toggle('on',b.dataset.t===t);});renderView();window.scrollTo(0,0);}
+function renderAll(){renderTop();renderGuide();renderView();}
+function renderTop(){
+ $('#ore').textContent=fmt(S.ore);
+ $('#rate').textContent='+'+prodRate().toFixed(1)+'/с';
+ $('#ess').textContent=fmt(S.ess);
+ $('#star').textContent=S.star;
+ $('#spd').textContent=S.spd;
+ $('#pow').textContent=power();
+ $('#flv').textContent='Этаж '+S.floor+(S.skin?' 🌟':'');
+ $('#car').style.display=(S.carEnd>Date.now())?'inline-block':'none';
 }
-
-function render() {
-  if (state.view === "intro" || state.view === "scene") renderScene();
-  else if (state.view === "base") renderBase();
-  else if (state.view === "ending") renderEnding();
+function renderGuide(){
+ var g=$('#guide');
+ if(S.guide<GUIDE.length){g.style.display='inline-block';g.textContent='👉 '+GUIDE[S.guide].n;}
+ else g.style.display='none';
 }
-
-function renderScene() {
-  const s = SCENES[state.scene];
-  if (!s) { state.view = "base"; return render(); }
-
-  const npc = s.npc ? NPCS[s.npc] : null;
-  const app = document.getElementById("app");
-
-  app.innerHTML = `
-    <div class="scene-view">
-      <div class="portrait">
-        ${npc
-          ? `<div class="npc-avatar" style="border-color: ${npc.color}; color: ${npc.color}">${npc.emoji}</div>
-             <div class="npc-name">${npc.name}</div>`
-          : `<div class="npc-avatar empty">🌊</div>`}
-      </div>
-      <div class="dialog-box">
-        <div class="dialog-text">${s.text.replace(/\n/g, '<br>')}</div>
-        <div class="choices">
-          ${s.choices.map((c, i) => `<button class="choice-btn" data-choice="${i}">${c.text}</button>`).join('')}
-        </div>
-      </div>
-    </div>`;
-
-  app.querySelectorAll('.choice-btn').forEach(btn => {
-    btn.addEventListener('click', () => handleChoice(parseInt(btn.dataset.choice, 10)));
-  });
+function chancePct(l){
+ var e=RAID[l].e,P=power();
+ var p=Math.max(0.05,Math.min(0.95,P/(P+e)));
+ p=Math.min(0.97,p*(1+relicSum('win')*0.15));
+ return Math.round(p*100)+'%';
 }
-
-function handleChoice(idx) {
-  const s = SCENES[state.scene];
-  const choice = s.choices[idx];
-  if (!choice) return;
-
-  if (choice.trust) {
-    for (const npc in choice.trust) {
-      state.npcs[npc].trust = Math.max(0, Math.min(100, state.npcs[npc].trust + choice.trust[npc]));
-    }
+function renderView(){
+ var v=$('#view'),h='';
+ if(TAB==='city'){
+  h+='<div id="grid">';
+  for(var i=0;i<36;i++){
+   var c=S.grid[i];
+   if(S.sparkIdx===i){h+='<div class="cell spark" data-i="'+i+'">✨</div>';continue;}
+   if(c){
+    var cls='cell b'+(c.done?'':' pend');
+    h+='<div class="'+cls+'" data-i="'+i+'">'+BLD[c.k].i+'<span class="lv">'+c.lvl+'</span>';
+    if(!c.done)h+='<span class="pr">'+Math.max(0,Math.round((1-(c.t-Date.now())/c.dur)*100))+'%</span>';
+    h+='</div>';
+   }else h+='<div class="cell" data-i="'+i+'">'+(sel?'➕':'')+'</div>';
   }
-
-  if (choice.ending) {
-    state.view = "ending";
-    state.scene = "ending_" + choice.ending;
-    save();
-    render();
-    return;
+  h+='</div><div class="mini">Тап по клетке — построить. Тап по зданию — улучшить. Рынок любит шахты по соседству.</div><div id="pal">';
+  for(var j=0;j<RK.length;j++){
+   var k=RK[j],b=BLD[k];
+   if(b.u>S.floor)continue;
+   h+='<div class="pal'+(sel===k?' sel':'')+'" data-k="'+k+'"><span class="pi">'+b.i+'</span><span class="pn">'+b.n+'</span><span class="pc">'+bCost(k)+' ⛏</span></div>';
   }
-
-  if (choice.next === "base") {
-    if (s.npc) {
-      state.npcs[s.npc].scenesPlayed++;
-      state.npcs[s.npc].recruited = true;
-    }
-    state.view = "base";
-    checkFinalAvailable();
-    save();
-    render();
-  } else if (choice.next === "intro") {
-    state.view = "intro";
-    state.scene = "intro";
-    save();
-    render();
-  } else if (choice.next) {
-    state.scene = choice.next;
-    save();
-    render();
+  h+='</div>';
+ }
+ if(TAB==='raid'){
+  h+='<h2 class="sec">💪 Сила отряда: '+power()+'</h2>';
+  for(var l=0;l<3;l++){
+   var r=RAID[l],cd=S.cool>Date.now();
+   h+='<div class="row" style="border-color:'+r.col+'"><h3>⚔️ '+r.n+' поход</h3><div class="d">Враг: '+r.e+' · Награда: '+r.lo+'–'+r.hi+' 💠 · Реликвия: '+Math.round(r.rel*100)+'%</div>';
+   h+='<div class="d">Шанс победы: <b>'+chancePct(l)+'</b></div>';
+   h+='<button class="btn" data-r="'+l+'"'+(cd?' disabled':'')+'>Отправить отряд'+(cd?' ('+mmss(S.cool-Date.now())+')':'')+'</button></div>';
   }
-}
-
-function renderBase() {
-  const app = document.getElementById("app");
-  const rate = getTotalRate();
-  const scenes = totalScenes();
-  const total = 6;
-
-  app.innerHTML = `
-    <div class="base-view">
-      <header class="header">
-        <div class="resources">
-          <span class="res-icon">🌾</span>
-          <span id="res-count">${Math.floor(state.resources)}</span>
-          <span class="res-rate">+${rate.toFixed(2)}/сек</span>
-        </div>
-      </header>
-
-      <div class="tap-zone">
-        <button class="tap-btn" id="tap-btn">
-          <div class="tap-emoji">🔨</div>
-          <div class="tap-label">Собрать ресурсы</div>
-        </button>
-      </div>
-
-      <div class="section-title">Улучшения</div>
-      <div class="upgrades">
-        ${Object.entries(UPGRADES).map(([k, u]) => {
-          const lvl = state.upgrades[k];
-          const cost = u.costs[lvl];
-          const canAfford = cost !== undefined && state.resources >= cost;
-          const maxed = lvl >= u.costs.length;
-          const opensScene = u.npc && lvl < 2 && !maxed;
-          return `
-            <div class="upgrade-card ${canAfford ? 'affordable' : ''} ${maxed ? 'maxed' : ''}">
-              <div class="upg-icon">${u.icon}</div>
-              <div class="upg-info">
-                <div class="upg-name">${u.name} <span class="upg-lvl">ур. ${lvl}</span></div>
-                <div class="upg-cost">${maxed ? 'Максимум' : `Стоимость: ${cost} 🌾`}</div>
-                ${opensScene ? `<div class="upg-hint">→ откроет сцену с ${NPCS[u.npc].name}</div>` : ''}
-              </div>
-              ${maxed ? '' : `<button class="upg-btn" data-upg="${k}" ${canAfford ? '' : 'disabled'}>+</button>`}
-            </div>`;
-        }).join('')}
-      </div>
-
-      <div class="section-title">Выжившие</div>
-      <div class="npcs">
-        ${Object.entries(NPCS).map(([k, n]) => {
-          const npc = state.npcs[k];
-          return `
-            <div class="npc-card">
-              <div class="npc-avatar-sm" style="border-color: ${n.color}">${n.emoji}</div>
-              <div class="npc-info">
-                <div class="npc-name-sm">
-                  <span>${n.name}${npc.recruited ? '' : ' <span class="locked">(ждёт в долине)</span>'}</span>
-                  <span class="npc-progress">${npc.scenesPlayed}/2</span>
-                </div>
-                <div class="trust-bar">
-                  <div class="trust-fill" style="width: ${npc.trust}%; background: ${n.color}"></div>
-                </div>
-                <div class="trust-val">Доверие: ${npc.trust} · влияет на финал</div>
-              </div>
-            </div>`;
-        }).join('')}
-      </div>
-
-      <div class="scene-progress">Сцены: <b>${scenes}</b> / ${total}</div>
-
-      ${state.finalAvailable ? `
-        <div class="final-banner">
-          <div>Приближается зима. Пора решать.</div>
-          <button class="final-btn" id="final-btn">Собрать совет →</button>
-        </div>` : ''}
-    </div>`;
-
-  document.getElementById("tap-btn").addEventListener("click", () => {
-    state.resources += TAP_GAIN;
-    state.totalResources += TAP_GAIN;
-    const el = document.getElementById("res-count");
-    if (el) el.textContent = Math.floor(state.resources);
-    save();
-  });
-
-  app.querySelectorAll('.upg-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const k = btn.dataset.upg;
-      const u = UPGRADES[k];
-      const lvl = state.upgrades[k];
-      const cost = u.costs[lvl];
-      if (cost === undefined || state.resources < cost) return;
-
-      state.resources -= cost;
-      state.upgrades[k] = lvl + 1;
-      const newLevel = state.upgrades[k];
-
-      if (u.npc && state.npcs[u.npc]) {
-        const npc = state.npcs[u.npc];
-        let sceneToPlay = null;
-        if (newLevel >= 1 && npc.scenesPlayed === 0) sceneToPlay = 1;
-        else if (newLevel >= 2 && npc.scenesPlayed === 1) sceneToPlay = 2;
-
-        if (sceneToPlay) {
-          state.view = "scene";
-          state.scene = u.npc + "_" + sceneToPlay;
-          save();
-          render();
-          return;
-        }
-      }
-
-      save();
-      render();
-    });
-  });
-
-  const finalBtn = document.getElementById("final-btn");
-  if (finalBtn) {
-    finalBtn.addEventListener('click', () => {
-      state.view = "scene";
-      state.scene = "final";
-      save();
-      render();
-    });
+  h+='<div class="mini">До этажа '+(S.floor+1)+': осталось побед: '+Math.max(0,S.floor*5-S.raidWins)+'</div>';
+  h+='<h2 class="sec">Журнал походов</h2><div class="row rlog">';
+  if(!S.log.length)h+='<div class="re">Пока пусто. Отправь отряд!</div>';
+  for(var m=0;m<S.log.length;m++)h+='<div class="re">'+S.log[m]+'</div>';
+  h+='</div>';
+ }
+ if(TAB==='shop'){
+  h+='<div class="mini" style="margin-bottom:8px">⭐ — демо-валюта. В Telegram реальные платежи идут в Stars ([TG-INTEGRATION] в коде).</div>';
+  for(var s=0;s<SHOP.length;s++){
+   var it=SHOP[s];
+   var bought=(it.id==='offer'&&S.offer)||(it.id==='skin'&&S.skin);
+   h+='<div class="row"><h3>'+it.i+' '+it.n+'</h3><div class="d">'+it.d+'</div>';
+   h+='<button class="btn" data-buy="'+it.id+'"'+(bought?' disabled':'')+'>Купить — '+it.pr+' ⭐'+(bought?' ✓':'')+'</button></div>';
   }
+ }
+ if(TAB==='more'){
+  h+='<h2 class="sec">Календарь на 7 дней</h2><div class="row">';
+  h+='<div class="d">Стрик: '+S.streak.n+' дн. (до +35% наград)</div><div class="calrow">';
+  var names=['⛏','⛏','💠','⭐','⛏','💠','⭐'];
+  for(var d2=0;d2<7;d2++){
+   var cls='cd'+(d2<S.cal.n?' got':'')+(d2===S.cal.n?' now':'');
+   h+='<div class="'+cls+'">День '+(d2+1)+'<br>'+names[d2]+'</div>';
+  }
+  h+='</div><button class="btn" data-act="cal"'+(S.cal.taken?' disabled':'')+'>Забрать награду дня</button></div>';
+  h+='<h2 class="sec">Задания дня</h2><div class="row">';
+  var tl=[{n:'Добудь 200 руды',p:S.tasks.tOre,g:200},{n:'Построй 2 здания',p:S.tasks.tBuild,g:2},{n:'Выиграй 1 поход',p:S.tasks.tRaid,g:1}];
+  for(var t2=0;t2<3;t2++){
+   var tk=tl[t2];var pp=Math.min(100,Math.round(tk.p/tk.g*100));
+   h+='<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span>'+tk.n+'</span><span class="mini">'+Math.min(tk.p,tk.g)+'/'+tk.g+'</span></div><div class="prog"><i style="width:'+pp+'%"></i></div></div>';
+  }
+  h+='<button class="btn" data-act="tasks"'+(S.tasks.col?' disabled':'')+'>Забрать (+5 💠, +15 ⭐)'+(S.tasks.col?' ✓':'')+'</button></div>';
+  h+='<h2 class="sec">Исследования 💠</h2>';
+  for(var q=0;q<RES.length;q++){
+   var rs=RES[q],lvl=S.res[rs.id],cost=resCost(lvl);
+   h+='<div class="row"><h3>'+rs.n+' · ур. '+lvl+'</h3><div class="d">'+rs.d+'</div>';
+   h+='<button class="btn" data-res="'+rs.id+'"'+(lvl>=rs.max?' disabled':'')+'>'+(lvl>=rs.max?'Максимум':'Улучшить — '+cost+' 💠')+'</button></div>';
+  }
+  h+='<h2 class="sec">Реликвии ('+Object.keys(S.relic).length+'/'+RELICS.length+')</h2>';
+  for(var w=0;w<RELICS.length;w++){
+   var rl=RELICS[w],got=S.relic[rl.id];
+   h+='<div class="row'+(got?' gold':'')+'"><h3>'+(got?'🗡 ':'🔒 ')+rl.n+'</h3><div class="d">'+rl.d+'</div></div>';
+  }
+  h+='<h2 class="sec">Достижения</h2>';
+  for(var z=0;z<ACH.length;z++){
+   var a=ACH[z],ok=S.ach[a.id];
+   h+='<div class="row"><h3>'+(ok?'✅ ':'⬜ ')+a.n+'</h3><div class="d">'+a.d+'</div></div>';
+  }
+  h+='<h2 class="sec">Прочее</h2>';
+  h+='<div class="row"><div class="d">Ядра: '+S.cores+' (+'+Math.round(S.cores*corePct()*100)+'% добычи навсегда) · Погружений: '+S.prestige+'</div>';
+  h+='<button class="btn" data-act="prestige">🌀 Погружение'+(S.floor<5?' (с 5-го этажа)':'')+'</button>';
+  h+='<button class="btn ghost" data-act="share">📣 Поделиться городом</button>';
+  h+='<button class="btn warn" data-act="reset">🗑 Сбросить прогресс</button></div>';
+ }
+ v.innerHTML=h;
 }
-
-function renderEnding() {
-  const s = SCENES[state.scene];
-  const app = document.getElementById("app");
-
-  app.innerHTML = `
-    <div class="ending-view">
-      <div class="ending-title">${s.title}</div>
-      <div class="ending-text">${s.text.replace(/\n/g, '<br>')}</div>
-      <button class="restart-btn" id="restart-btn">Начать заново</button>
-    </div>`;
-
-  document.getElementById("restart-btn").addEventListener('click', () => {
-    if (confirm("Начать новую историю? Прогресс будет потерян.")) {
-      try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
-      state = defaultState();
-      state.view = "intro";
-      state.scene = "intro";
-      save();
-      render();
-    }
-  });
+document.addEventListener('click',function(e){
+ var el=e.target.closest('[data-i],[data-k],[data-r],[data-act],[data-buy],[data-res]');
+ if(!el)return;
+ if(el.dataset.i!==undefined&&el.dataset.i!==''){
+  var i=+el.dataset.i;
+  if(S.sparkIdx===i){tapSpark(i);return;}
+  if(S.grid[i])openSheet(i);else tryBuild(i);
+  return;
+ }
+ if(el.dataset.k){sel=(sel===el.dataset.k)?null:el.dataset.k;beep(500,0.06);renderAll();return;}
+ if(el.dataset.r!==undefined&&el.dataset.r!==''){goRaid(+el.dataset.r);return;}
+ if(el.dataset.buy){buy(el.dataset.buy);return;}
+ if(el.dataset.res){buyRes(el.dataset.res);return;}
+ var a=el.dataset.act;
+ if(a==='tab')setTab(el.dataset.t);
+ else if(a==='cal')takeCal();
+ else if(a==='tasks')collectTasks();
+ else if(a==='share')share();
+ else if(a==='prestige')prestige();
+ else if(a==='reset'){if(confirm('Сбросить весь прогресс?')){localStorage.removeItem('magnat3');S=def();save();renderAll();}}
+ else if(a==='close')hideSheet();
+ else if(a==='upg'){
+  var ci=+el.dataset.i,c2=S.grid[ci],uc=upCost(c2);
+  if(S.ore<uc){toast('Не хватает руды');beep(200,0.15);return;}
+  S.ore-=uc;c2.lvl++;S.seen[c2.k]=1;
+  beep(500,0.12);hideSheet();save();renderAll();
+ }
+ else if(a==='spd'){
+  var si=+el.dataset.i;
+  if(S.spd<1){toast('Нет ускорений');return;}
+  S.spd--;S.grid[si].t=Date.now();hideSheet();save();renderAll();
+ }
+ else if(a==='rm'){
+  var ri=+el.dataset.i,c3=S.grid[ri];
+  S.ore=Math.min(capTotal(),S.ore+Math.round(BLD[c3.k].c*0.5));
+  delete S.grid[ri];hideSheet();save();renderAll();
+ }
+});
+$('#ov').addEventListener('click',function(e){if(e.target===this)hideSheet();});
+function init(){
+ offline();renderAll();
+ setInterval(function(){
+  tick();renderTop();
+  if(TAB==='city'){updateCells();renderGuide();}
+  if(TAB==='raid')renderView();
+ },1000);
 }
-
+function updateCells(){
+ var all=document.querySelectorAll('.cell.pend');
+ if(!all.length)return;
+ var done=false;
+ all.forEach(function(el){
+  var i=+el.dataset.i,c=S.grid[i];if(!c)return;
+  if(Date.now()>=c.t){done=true;return;}
+  var pr=el.querySelector('.pr');
+  if(pr)pr.textContent=Math.max(0,Math.round((1-(c.t-Date.now())/c.dur)*100))+'%';
+ });
+ if(done)renderAll();
+}
 init();
 </script>
 </body>
