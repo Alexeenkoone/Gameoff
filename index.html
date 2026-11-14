@@ -1,606 +1,783 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<meta name="color-scheme" content="dark">
-<title>Подземный Магнат</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{background:#14161d;color:#e8e6e3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;user-select:none;-webkit-user-select:none;touch-action:manipulation;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
-#top{position:sticky;top:0;z-index:20;background:#1b1e28;padding:calc(6px + env(safe-area-inset-top)) 10px 8px;border-bottom:1px solid #2c3143}
-.res{display:flex;gap:6px;flex-wrap:wrap;font-size:13px;align-items:center}
-.res span{background:#262a38;border-radius:8px;padding:4px 8px;white-space:nowrap}
-.res small{color:#8b90a3;font-weight:400}
-#car{display:none;background:#4a3a12;border:1px solid #a8791f}
-#guide{margin-top:6px;font-size:12px;color:#ffd479;background:#33290f;border-radius:8px;padding:5px 8px;display:inline-block}
-#tabs{display:flex;gap:6px;margin-top:8px}
-.tb{flex:1;background:#262a38;border:none;border-radius:10px;color:#c8cbd8;padding:9px 0;font-size:14px;cursor:pointer}
-.tb.on{background:#f5b942;color:#14161d;font-weight:700}
-#view{padding:10px;max-width:520px;margin:0 auto}
-#grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
-.cell{aspect-ratio:1;border:1px solid #2c3143;border-radius:8px;background:#1b1e28;display:flex;align-items:center;justify-content:center;font-size:20px;position:relative;cursor:pointer;overflow:hidden}
-.cell.b{background:#242a3e;border-color:#3a415c}
-.cell.pend{opacity:.75}
-.lv{position:absolute;bottom:2px;right:4px;font-size:10px;color:#8b90a3}
-.pr{position:absolute;top:2px;left:0;right:0;text-align:center;font-size:10px;color:#7fd4a0}
-.cell.spark{background:radial-gradient(circle,#5a4a12,#241d06);border-color:#f5b942;animation:pulse 1s infinite}
-@keyframes pulse{50%{box-shadow:0 0 12px #f5b942}}
-.fl{position:absolute;top:30%;left:50%;transform:translateX(-50%);font-size:13px;color:#ffd479;pointer-events:none;animation:fly .9s forwards;z-index:5;white-space:nowrap}
-@keyframes fly{to{transform:translate(-50%,-40px);opacity:0}}
-#pal{display:flex;gap:6px;overflow-x:auto;padding:8px 0 4px}
-.pal{min-width:86px;background:#242a3e;border:1px solid #3a415c;border-radius:10px;padding:8px 6px;text-align:center;cursor:pointer;flex-shrink:0}
-.pal.sel{border-color:#f5b942;background:#3a3012}
-.pal .pi{font-size:20px;display:block}
-.pal .pn{font-size:11px;display:block;margin:2px 0}
-.pal .pc{font-size:11px;color:#7fd4a0;display:block}
-.row{background:#1d2130;border:1px solid #2c3143;border-radius:12px;padding:12px;margin-bottom:10px}
-.row h3{font-size:14px;margin-bottom:4px}
-.row .d{font-size:12px;color:#8b90a3}
-.btn{display:block;width:100%;background:#f5b942;color:#14161d;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px}
-.btn.ghost{background:#262a38;color:#c8cbd8}
-.btn.warn{background:#7a3030;color:#ffe3e3}
-.btn[disabled]{opacity:.45}
-.prog{height:6px;background:#2c3143;border-radius:3px;margin-top:6px;overflow:hidden}
-.prog i{display:block;height:100%;background:#7fd4a0}
-.sheet{background:#232839;border-radius:16px 16px 0 0;padding:16px;width:100%;max-width:480px;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
-.sh-h{font-size:16px;font-weight:700;margin-bottom:6px}
-.sh-d{font-size:13px;color:#7fd4a0}
-.sh-lore{font-size:12px;color:#8b90a3;font-style:italic;margin:8px 0}
-#ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:50}
-#ov.up{align-items:center}
-.mbox{background:#232839;border-radius:16px;padding:18px;width:88%;max-width:420px;text-align:center}
-#toast{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#333a4f;border-radius:10px;padding:9px 14px;font-size:13px;display:none;z-index:60;max-width:90%;text-align:center}
-.gold{border-color:#f5b942;box-shadow:0 0 8px rgba(245,185,66,.35)}
-.mini{font-size:11px;color:#8b90a3}
-h2.sec{font-size:15px;margin:14px 0 8px;color:#f5b942}
-.rlog .re{font-size:12px;padding:6px 8px;border-bottom:1px solid #2c3143}
-.calrow{display:flex;gap:6px;margin-top:8px}
-.calrow .cd{flex:1;text-align:center;background:#242a3e;border:1px solid #3a415c;border-radius:8px;padding:8px 2px;font-size:12px}
-.calrow .cd.got{opacity:.35}
-.calrow .cd.now{border-color:#f5b942}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Подземный магнат v4</title>
+  <style>
+    :root {
+      --bg: #0b0b12;
+      --bg-panel: #1a1a26;
+      --accent: #f5c518;
+      --accent-hover: #e6b000;
+      --text: #e0e0e0;
+      --text-dim: #888;
+      --border: #333;
+      --danger: #ff4d4d;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Header */
+    header {
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .stats {
+      display: flex;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .chip {
+      background: #2a2a3a;
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .chip.ore { background: #2a3a2a; color: #a0d0a0; }
+    .chip.star { background: #3a2a3a; color: #d0a0ff; }
+    .chip.speed { background: #3a3a2a; color: #d0d0a0; }
+    .chip.level { background: #2a2a3a; color: var(--accent); }
+    /* Tabs */
+    .tabs {
+      flex: 1;
+      display: flex;
+      gap: 6px;
+    }
+    .tab {
+      flex: 1;
+      padding: 8px 12px;
+      background: #1a1a26;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-dim);
+      text-align: center;
+      cursor: pointer;
+      transition: 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 13px;
+    }
+    .tab.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      box-shadow: 0 0 8px rgba(245, 197, 24, 0.4);
+    }
+    .tab:active { transform: scale(0.98); }
+    /* Main area */
+    main {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(180deg, #12121a 0%, #0b0b12 100%);
+    }
+    /* Error overlay */
+    #error-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.9);
+      color: var(--danger);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+      text-align: center;
+    }
+    #error-overlay.show { display: flex; }
+    #error-msg { font-size: 16px; line-height: 1.4; white-space: pre-wrap; }
+    /* City grid */
+    #city-area {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 4px;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    .cell {
+      background: #12121a;
+      border: 1px solid #222;
+      border-radius: 6px;
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .cell:active { transform: scale(0.98); }
+    .building {
+      width: 80%; height: 80%;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      box-sizing: border-box;
+      position: relative;
+      border: 1px solid #444;
+      background: #2a2a3a;
+      text-align: center;
+      font-size: 11px;
+    }
+    .building.mine { background: #2a3a2a; border-color: #4a6a4a; }
+    .building.storage { background: #3a3a2a; border-color: #5a5a4a; }
+    .building.barracks { background: #3a2a2a; border-color: #5a4a4a; }
+    .level-badge {
+      position: absolute;
+      top: 2px; right: 2px;
+      background: #000; color: var(--accent);
+      font-size: 10px;
+      padding: 1px 4px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+    .spark {
+      position: absolute;
+      width: 16px; height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #fff;
+      animation: pulse 1.2s infinite alternate;
+      cursor: pointer;
+      z-index: 5;
+    }
+    @keyframes pulse { from { transform: scale(1); opacity: 1; } to { transform: scale(1.3); opacity: 0.6; } }
+    .toast {
+      position: absolute;
+      top: 20px; left: 50%;
+      transform: translateX(-50%) scale(0.8);
+      background: rgba(0,0,0,0.85);
+      color: var(--accent);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) scale(1); }
+    /* Raid view */
+    #raid-area {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .raid-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .raid-card h3 { margin: 0 0 8px 0; color: var(--accent); }
+    .raid-card p { margin: 0 0 12px 0; color: var(--text-dim); }
+    .btn {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn:disabled { background: #333; color: #666; cursor: not-allowed; }
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #222;
+      border-radius: 3px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s;
+    }
+    /* Shop & More */
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      padding: 10px;
+      max-width: 400px;
+      width: 100%;
+    }
+    .shop-item {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .shop-item:active { transform: scale(0.98); }
+    .shop-item h4 { margin: 0 0 6px 0; font-size: 13px; }
+    .shop-item .cost { color: var(--accent); font-weight: bold; }
+    /* Welcome back */
+    #welcome-back {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.95);
+      color: var(--text);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      text-align: center;
+      padding: 20px;
+    }
+    #welcome-back.show { display: flex; }
+    #welcome-back h2 { margin: 0 0 12px 0; color: var(--accent); }
+    #welcome-back p { margin: 0 0 20px 0; color: var(--text-dim); }
+    /* Guide chip */
+    #guide-chip {
+      position: absolute;
+      top: 12px; left: 12px;
+      background: rgba(0,0,0,0.8);
+      color: var(--accent);
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      z-index: 5;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      pointer-events: none;
+      display: none;
+    }
+    #guide-chip.show { display: block; }
+  </style>
 </head>
 <body>
-<div id="top">
- <div class="res">
-  <span>⛏ <b id="ore">0</b> <small id="rate"></small></span>
-  <span>💠 <b id="ess">0</b></span>
-  <span>⭐ <b id="star">0</b></span>
-  <span>⚡ <b id="spd">0</b></span>
-  <span>💪 <b id="pow">0</b></span>
-  <span id="flv">Этаж 1</span>
-  <span id="car">🛒 ×2</span>
- </div>
- <div id="guide"></div>
- <div id="tabs">
-  <button class="tb on" data-act="tab" data-t="city">🏙 Город</button>
-  <button class="tb" data-act="tab" data-t="raid">⚔️ Поход</button>
-  <button class="tb" data-act="tab" data-t="shop">🛒 Лавка</button>
-  <button class="tb" data-act="tab" data-t="more">📜 Ещё</button>
- </div>
-</div>
-<div id="view"></div>
-<div id="ov"></div>
-<div id="toast"></div>
-<script>
-'use strict';
+  <header>
+    <div class="stats">
+      <span class="chip ore">Руда: <span id="stat-ore">0</span></span>
+      <span class="chip star">Звёзды: <span id="stat-star">0</span></span>
+      <span class="chip speed">Ускорения: <span id="stat-speed">0</span></span>
+      <span class="chip level">Этаж: <span id="stat-level">1</span></span>
+    </div>
+    <div class="tabs">
+      <div class="tab active" data-view="city">🏙 Город</div>
+      <div class="tab" data-view="raid">⚔️ Поход</div>
+      <div class="tab" data-view="shop">🏪 Лавка</div>
+      <div class="tab" data-view="more">ℹ Ещё</div>
+    </div>
+  </header>
 
-var BLD={
-shaft:{n:'Шахта',i:'⛏',c:30,u:1,r:0.5,d:'Добывает руду',lore:'Старые выработки отдают то, что помнят руки копателей.'},
-house:{n:'Дом рудокопа',i:'🏠',c:80,u:1,h:0.05,d:'+5% добычи за каждый',lore:'Дым из трубы — значит, город жив.'},
-wh:{n:'Склад',i:'📦',c:120,u:1,cap:300,d:'+300 к пределу руды',lore:'Руду не сбережёшь — потеряешь.'},
-bar:{n:'Казарма',i:'🛡',c:100,u:1,p:5,d:'+5 к силе отряда',lore:'Здесь учат держать щит даже во сне.'},
-mkt:{n:'Рынок',i:'🏪',c:200,u:1,adj:0.1,d:'+10% за каждую соседнюю шахту',lore:'Торговля — вторая жила глубин.'},
-tower:{n:'Вышка',i:'🗼',c:350,u:2,p:8,d:'+8 к силе отряда',lore:'Отсюда видно, кто идёт из тьмы.'},
-work:{n:'Мастерская',i:'⚒',c:400,u:2,p:15,d:'+15 к силе отряда',lore:'Сталь, закалённая в грибе-пламени.'},
-vault:{n:'Реликварий',i:'🗡',c:600,u:3,relic:0.02,d:'+2% к шансу реликвии',lore:'Память города хранит здесь своё.'},
-forge:{n:'Кузня',i:'🔥',c:800,u:3,r:2,p:3,d:'+2 руды/с и +3 к силе',lore:'Жар из лавовой жилы бьёт в наковальню.'},
-gard:{n:'Грибной сад',i:'🍄',c:1200,u:4,r:5,d:'+5 руды/с',lore:'Светящиеся шапки кормят весь ярус.'},
-obel:{n:'Обелиск',i:'🗿',c:2000,u:4,p:25,d:'+25 к силе отряда',lore:'Он молчит так, что лучше бы кричал.'}
-};
-var RK=['shaft','house','wh','bar','mkt','tower','work','vault','forge','gard','obel'];
+  <main>
+    <div id="error-overlay">
+      <div id="error-msg"></div>
+      <button class="btn" style="margin-top:12px;" onclick="location.reload()">Перезагрузить</button>
+    </div>
 
-var RELICS=[
-{id:'r1',n:'Пик Глубин',d:'+10% добычи',idle:0.1},
-{id:'r2',n:'Щит Предков',d:'+3 к силе',p:3},
-{id:'r3',n:'Ключ Стволов',d:'+200 к пределу руды',cap:200},
-{id:'r4',n:'Лампа Искателя',d:'+1% к шансу реликвии',relic:0.01},
-{id:'r5',n:'Молот Ярусов',d:'+15% 💠 из походов',ess:0.15},
-{id:'r6',n:'Зеркало Каравана',d:'Искры и караван чаще на 15%',ev:0.15},
-{id:'r7',n:'Костяной Компас',d:'+15% к шансу победы',win:0.15},
-{id:'r8',n:'Печать Ядра',d:'Ядра дают +8% добычи вместо +5%',core:0.08},
-{id:'r9',n:'Слеза Магмы',d:'+25% добычи',idle:0.25},
-{id:'r10',n:'Куб Столкновений',d:'+10% 💠 за победу в походе',raid:0.1}
-];
+    <div id="welcome-back">
+      <h2>С возвращением!</h2>
+      <p>Вы отсутствовали <span id="welcome-days">0</span> дн. Добыто: <span id="welcome-ore">0</span> руды.</p>
+      <button class="btn" onclick="closeWelcome()">Продолжить</button>
+    </div>
 
-var RES=[
-{id:'idle',n:'Глубинная тяга',d:'+10% добычи за уровень',max:10},
-{id:'pow',n:'Тактика отрядов',d:'+2 к силе за уровень',max:10},
-{id:'cap',n:'Хитрые склады',d:'+200 к пределу за уровень',max:10},
-{id:'rel',n:'Чутьё искателя',d:'+1% к шансу реликвии за уровень',max:10},
-{id:'spark',n:'Магнит искр',d:'Искры чаще на 10% за уровень',max:10}
-];
-function resCost(l){return 5*Math.pow(2,l);}
+    <div id="guide-chip">Гайд: Постройте шахту на любой клетке</div>
 
-var RAID=[
-{n:'Обычный',e:8,lo:3,hi:6,rel:0.05,col:'#3b7a57'},
-{n:'Элитный',e:25,lo:8,hi:15,rel:0.10,col:'#a8791f'},
-{n:'Геройский',e:60,lo:20,hi:35,rel:0.20,col:'#8a2b2b'}
-];
+    <!-- City -->
+    <div id="city-area" style="display:flex;">
+      <!-- JS will fill cells -->
+    </div>
 
-var ACH=[
-{id:'a1',n:'Первая шахта',d:'Построй шахту'},
-{id:'a2',n:'Первая победа',d:'Выиграй поход'},
-{id:'a3',n:'Добытчик',d:'1000 руды за всё время'},
-{id:'a4',n:'Этаж 2',d:'Поднимись на второй этаж'},
-{id:'a5',n:'Пять побед',d:'5 побед в походах'},
-{id:'a6',n:'Первая реликвия',d:'Найди реликвию'},
-{id:'a7',n:'Десять построек',d:'10 зданий в городе'},
-{id:'a8',n:'Стрик 3',d:'Заходи 3 дня подряд'},
-{id:'a9',n:'Этаж 5',d:'Поднимись на пятый этаж'},
-{id:'a10',n:'Погружение',d:'Соверши первое Погружение'}
-];
-function achOk(id){
- var c=countOf;
- if(id==='a1')return c('shaft')>0;
- if(id==='a2')return S.raidWins>=1;
- if(id==='a3')return S.totalOre>=1000;
- if(id==='a4')return S.floor>=2;
- if(id==='a5')return S.raidWins>=5;
- if(id==='a6')return Object.keys(S.relic).length>=1;
- if(id==='a7')return Object.keys(S.grid).length>=10;
- if(id==='a8')return S.streak.n>=3;
- if(id==='a9')return S.floor>=5;
- if(id==='a10')return S.prestige>=1;
- return false;
-}
+    <!-- Raid -->
+    <div id="raid-area" style="display:none;">
+      <h2 style="color:var(--accent);">⚔️ Поход</h2>
+      <p style="color:var(--text-dim);">Выберите уровень сложности. Чем выше — тем больше награда, но и риск.</p>
+      <div class="raid-card">
+        <h3>Уровень 1</h3>
+        <p>Лёгкий рейд. Шанс победы: 90%<br>Награда: 50 руды + 1 звезда</p>
+        <button class="btn" onclick="startRaid(1)">В бой!</button>
+      </div>
+      <div class="raid-card">
+        <h3>Уровень 2</h3>
+        <p>Средний рейд. Шанс победы: 70%<br>Награда: 120 руды + 3 звезды</p>
+        <button class="btn" onclick="startRaid(2)">В бой!</button>
+      </div>
+      <div class="raid-card">
+        <h3>Уровень 3</h3>
+        <p>Сложный рейд. Шанс победы: 50%<br>Награда: 300 руды + 8 звёзд</p>
+        <button class="btn" onclick="startRaid(3)">В бой!</button>
+      </div>
+      <div style="margin-top:20px; text-align:center; color:var(--text-dim);">
+        Журнал походов: <span id="raid-log">0 побед</span>
+      </div>
+    </div>
 
-var SHOP=[
-{id:'offer',i:'🎁',n:'Стартовый оффер',pr:49,d:'+5 ускорений и 1000 руды',once:true},
-{id:'set',i:'🧱',n:'Набор строителя',pr:99,d:'+5 ускорений и 500 руды'},
-{id:'chest',i:'💎',n:'Сундук зодчего',pr:199,d:'+15 ускорений и 30 💠'},
-{id:'pack',i:'📅',n:'Пак на месяц',pr:499,d:'+25% добычи на 30 дней'},
-{id:'skin',i:'🎨',n:'Облик города',pr:299,d:'Золотая рамка города',cosm:true}
-];
+    <!-- Shop -->
+    <div id="shop-area" style="display:none; padding:10px;">
+      <h3 style="color:var(--accent); margin:0 0 12px 0;">🏪 Лавка</h3>
+      <div class="shop-grid">
+        <div class="shop-item" onclick="buyUpgrade('ore_mult')">
+          <h4>Множитель руды ×1.2</h4>
+          <div class="cost">Стоимость: 500 руды</div>
+        </div>
+        <div class="shop-item" onclick="buyUpgrade('star_mult')">
+          <h4>Множитель звёзд ×1.2</h4>
+          <div class="cost">Стоимость: 200 звёзд</div>
+        </div>
+        <div class="shop-item" onclick="buyUpgrade('auto_mine')">
+          <h4>Авто-добыча</h4>
+          <div class="cost">Стоимость: 1000 руды</div>
+        </div>
+        <div class="shop-item" onclick="buyUpgrade('speed_pack')">
+          <h4>Пакет ускорений (×10)</h4>
+          <div class="cost">Стоимость: 100 звёзд</div>
+        </div>
+      </div>
+    </div>
 
-function calReward(n){
- var arr=[{o:100},{o:200},{e:5},{s:20},{o:500},{e:10},{s:50}];
- return arr[n%7];
-}
+    <!-- More -->
+    <div id="more-area" style="display:none; padding:10px; text-align:center;">
+      <h3 style="color:var(--accent); margin:0 0 12px 0;">ℹ Ещё</h3>
+      <p style="color:var(--text-dim);">Версия: v4.0<br>Прогресс можно сбросить для получения вечных ядер (+5% к добыче).</p>
+      <button class="btn" style="margin-top:12px;" onclick="resetProgress()">🗑 Сброс прогресса</button>
+      <button class="btn" style="margin-top:8px;" onclick="alert('Share-карточка с вашим кодом будет добавлена в следующем обновлении!')">📤 Поделиться</button>
+    </div>
+  </main>
 
-function def(){return{
-ore:150,ess:0,star:100,spd:0,cores:0,
-grid:{},floor:1,wins:0,raidWins:0,raids:0,
-totalOre:0,last:Date.now(),
-guide:0,seen:{},
-tasks:{day:dayKey(),tOre:0,tBuild:0,tRaid:0,col:false},
-cal:{day:dayKey(),n:0,taken:false},
-streak:{day:dayKey(),n:0},
-relic:{},ach:{},
-res:{idle:0,pow:0,cap:0,rel:0,spark:0},
-cool:0,sparkIdx:-1,sparkEnd:0,sparkAt:Date.now()+180000,carEnd:0,carAt:Date.now()+300000,
-packEnd:0,skin:false,prestige:0,offer:false,
-code:'MAG-'+(1000+Math.floor(Math.random()*9000)),
-log:[]
-};}
-function dayKey(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
-function load(){try{var raw=localStorage.getItem('magnat3');if(raw){var o=JSON.parse(raw);var d=def();for(var k in d){if(!(k in o))o[k]=d[k];}return o;}}catch(e){}return def();}
-var S=load();
-function save(){try{localStorage.setItem('magnat3',JSON.stringify(S));}catch(e){}}
-setInterval(save,5000);
-window.addEventListener('beforeunload',save);
+  <script>
+    // --- STATE ---
+    const S = {
+      ore: 150,
+      star: 0,
+      speed: 0,
+      level: 1,
+      raidsWon: 0,
+      offlineOre: 0,
+      lastTick: 0,
+      tickRate: 1000, // ms
+      buildings: {}, // cellId -> {type, level}
+      upgrades: { ore_mult: 1, star_mult: 1, auto_mine: false, speed_pack: 0 },
+      guideStep: 1,
+      sparkCell: null,
+      sparkTimer: null,
+      raidInProgress: false,
+      raidProgress: 0,
+      raidTimer: null,
+      lastSave: 0
+    };
 
-function countOf(k){var n=0;for(var i in S.grid){if(S.grid[i].k===k)n++;}return n;}
-function relicSum(f){var v=0;for(var i=0;i<RELICS.length;i++){if(S.relic[RELICS[i].id]&&RELICS[i][f])v+=RELICS[i][f];}return v;}
-function bCost(k){return BLD[k].c;}
-function upCost(c){var b=BLD[c.k];return Math.round(b.c*0.8*Math.pow(1.6,c.lvl));}
-function corePct(){return relicSum('core')>0?0.08:0.05;}
-function prodRate(){
- var base=0;
- for(var i in S.grid){var c=S.grid[i];if(!c.done)continue;var b=BLD[c.k];if(b.r)base+=b.r*c.lvl;}
- var m=1;
- m*=1+countOf('house')*0.05+S.res.idle*0.1+relicSum('idle');
- var adj=0;
- for(var idx in S.grid){var c2=S.grid[idx];if(!(c2.done&&BLD[c2.k].adj))continue;
-  var x=idx%6,y=Math.floor(idx/6);
-  var dirs=[[1,0],[-1,0],[0,1],[0,-1]];
-  for(var d=0;d<4;d++){var nx=x+dirs[d][0],ny=y+dirs[d][1];if(nx<0||nx>5||ny<0||ny>5)continue;
-   var nb=S.grid[ny*6+nx];if(nb&&nb.done&&BLD[nb.k].r)adj+=BLD[c2.k].adj;}
- }
- m*=1+adj;
- m*=1+S.cores*corePct();
- var now=Date.now();
- if(S.carEnd>now)m*=2;
- if(S.packEnd>now)m*=1.25;
- return base*m;
-}
-function capTotal(){return 500+countOf('wh')*300+S.res.cap*200+relicSum('cap');}
-function power(){return countOf('bar')*5+countOf('tower')*8+countOf('work')*15+countOf('obel')*25+countOf('forge')*3+S.res.pow*2+relicSum('p');}
-function mmss(ms){ms=Math.max(0,ms);var m=Math.floor(ms/60000),s=Math.floor(ms%60000/1000);return m+':'+(s<10?'0':'')+s;}
-function fmt(n){n=Math.floor(n);if(n>=1000000)return (n/1000000).toFixed(1)+'M';if(n>=10000)return (n/1000).toFixed(1)+'k';return n;}
+    // --- UTILS ---
+    function save() {
+      try {
+        localStorage.setItem('magnat_v4', JSON.stringify(S));
+        S.lastSave = Date.now();
+      } catch(e) { showError('Не удалось сохранить прогресс: ' + e.message); }
+    }
+    function load() {
+      try {
+        const raw = localStorage.getItem('magnat_v4');
+        if (raw) {
+          const old = JSON.parse(raw);
+          // Миграция: если старая версия, просто берём базовые поля
+          if (old) {
+            S.ore = old.ore || S.ore;
+            S.star = old.star || S.star;
+            S.speed = old.speed || S.speed;
+            S.level = old.level || S.level;
+            S.raidsWon = old.raidsWon || S.raidsWon;
+            S.buildings = old.buildings || S.buildings;
+            S.upgrades = old.upgrades || S.upgrades;
+            S.guideStep = old.guideStep || S.guideStep;
+            S.lastSave = old.lastSave || S.lastSave;
+          }
+        }
+      } catch(e) { showError('Ошибка загрузки: ' + e.message); }
+    }
+    function showError(msg) {
+      const el = document.getElementById('error-msg');
+      const overlay = document.getElementById('error-overlay');
+      el.textContent = msg;
+      overlay.classList.add('show');
+    }
+    function hideError() {
+      document.getElementById('error-overlay').classList.remove('show');
+    }
 
-var AC=null;
-function beep(f,d){try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.value=f;g.gain.value=0.07;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+(d||0.1));o.stop(AC.currentTime+(d||0.1));}catch(e){}}
-var tt=null;
-function toast(t){var e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(tt);tt=setTimeout(function(){e.style.display='none';},2200);}
-function showSheet(html,centered){var o=$('#ov');o.innerHTML=html;o.style.display='flex';if(centered)o.classList.add('up');else o.classList.remove('up');}
-function hideSheet(){$('#ov').style.display='none';}
+    // --- RENDER ---
+    function renderStats() {
+      document.getElementById('stat-ore').textContent = Math.floor(S.ore);
+      document.getElementById('stat-star').textContent = S.star;
+      document.getElementById('stat-speed').textContent = S.speed;
+      document.getElementById('stat-level').textContent = S.level;
+    }
+    function renderCity() {
+      const area = document.getElementById('city-area');
+      area.innerHTML = '';
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 5; c++) {
+          const id = r + '_' + c;
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.id = id;
+          cell.onclick = () => onCellClick(id);
 
-function tick(){
- var now=Date.now();
- var dt=Math.min((now-S.last)/1000,14400);
- S.last=now;
- if(dt>0&&prodRate()>0){
-  var p=prodRate()*dt;var room=capTotal()-S.ore;
-  var real=Math.min(p,Math.max(0,room));
-  if(real>0){S.ore+=real;S.totalOre+=real;S.tasks.tOre+=real;}
- }
- var done=false;
- for(var i in S.grid){var c=S.grid[i];if(!c.done&&now>=c.t){c.done=true;done=true;toast('🏗 '+BLD[c.k].n+' построено');beep(520,0.15);}}
- if(S.sparkIdx<0&&now>=S.sparkAt)placeSpark();
- if(S.sparkIdx>=0&&now>S.sparkEnd){S.sparkIdx=-1;S.sparkAt=now+(180000+Math.random()*120000)/(1+S.res.spark*0.1+relicSum('ev')*0.15);if(TAB==='city')renderView();}
- if(S.carEnd&&now>=S.carEnd)S.carEnd=0;
- if(now>=S.carAt){S.carEnd=now+60000;S.carAt=now+(300000+Math.random()*240000)*(1-relicSum('ev')*0.15);toast('🛒 Караван: добыча ×2 на минуту!');beep(700,0.15);}
- if(S.tasks.day!==dayKey())S.tasks={day:dayKey(),tOre:0,tBuild:0,tRaid:0,col:false};
- if(S.cal.day!==dayKey()){
-  var y=new Date();y.setDate(y.getDate()-1);
-  var yk=y.getFullYear()+'-'+(y.getMonth()+1)+'-'+y.getDate();
-  if(S.cal.day===yk)S.streak.n++;else S.streak.n=1;
-  if(S.cal.n>=7)S.cal.n=0;
-  S.cal.day=dayKey();S.cal.taken=false;
- }
- checkGuide();checkAch();
-}
-function placeSpark(){
- var empty=[];for(var i=0;i<36;i++)if(!S.grid[i])empty.push(i);
- if(!empty.length)return;
- S.sparkIdx=empty[Math.floor(Math.random()*empty.length)];
- S.sparkEnd=Date.now()+20000;
- if(TAB==='city')renderView();
-}
-function tapSpark(i){
- if(i!==S.sparkIdx)return;
- var roll=Math.random(),txt;
- if(roll<0.6){var v=Math.max(20,Math.round(prodRate()*60));S.ore=Math.min(capTotal(),S.ore+v);txt='+'+v+' ⛏';}
- else if(roll<0.9){S.ess+=2;txt='+2 💠';}
- else{S.star+=5;txt='+5 ⭐';}
- floatNum(i,txt);beep(1200,0.1);
- S.sparkIdx=-1;
- S.sparkAt=Date.now()+(180000+Math.random()*120000)/(1+S.res.spark*0.1+relicSum('ev')*0.15);
- renderAll();
-}
+          const b = S.buildings[id];
+          if (b) {
+            const div = document.createElement('div');
+            div.className = 'building ' + b.type;
+            div.innerHTML = `<span class="level-badge">L\${b.level}</span>`;
+            if (b.type === 'mine') div.innerHTML += '<br>⛏';
+            if (b.type === 'storage') div.innerHTML += '<br>📦';
+            if (b.type === 'barracks') div.innerHTML += '<br>🛡';
+            cell.appendChild(div);
+          }
 
-var GUIDE=[
-{n:'Построй Шахту ⛏ (тапни по клетке)',chk:function(){return countOf('shaft')>0;},rw:function(){S.ore+=100;}},
-{n:'Построй Склад 📦',chk:function(){return countOf('wh')>0;},rw:function(){S.ore+=100;}},
-{n:'Построй Казарму 🛡',chk:function(){return countOf('bar')>0;},rw:function(){S.ess+=3;}},
-{n:'Выиграй поход на вкладке ⚔️',chk:function(){return S.raidWins>0;},rw:function(){S.ore+=200;S.ess+=3;}},
-{n:'Поднимись на этаж 2 (5 побед)',chk:function(){return S.floor>=2;},rw:function(){S.ess+=10;S.star+=25;}}
-];
-function checkGuide(){
- if(S.guide>=GUIDE.length)return;
- var g=GUIDE[S.guide];
- if(g.chk()){g.rw();S.guide++;toast('✅ Гайд выполнен — награда твоя!');beep(880,0.2);}
-}
+          // Spark
+          if (S.sparkCell === id) {
+            const spark = document.createElement('div');
+            spark.className = 'spark';
+            spark.onclick = () => onSparkClick();
+            cell.appendChild(spark);
+          }
 
-function goRaid(l){
- var now=Date.now();
- if(now<S.cool){toast('Отряд ещё в пути: '+mmss(S.cool-now));return;}
- S.cool=now+90000;S.raids++;
- var e=RAID[l].e,P=power();
- var p=Math.max(0.05,Math.min(0.95,P/(P+e)));
- p=Math.min(0.97,p*(1+relicSum('win')*0.15));
- if(Math.random()<p){
-  var g=Math.round((RAID[l].lo+Math.random()*(RAID[l].hi-RAID[l].lo))*(1+relicSum('ess')*0.15));
-  S.ess+=g;S.raidWins++;S.tasks.tRaid++;
-  var rc=RAID[l].rel+S.res.rel*0.01+relicSum('relic')+countOf('vault')*0.02;
-  var relTxt='';
-  if(Math.random()<rc){
-   var avail=[];for(var i=0;i<RELICS.length;i++)if(!S.relic[RELICS[i].id])avail.push(RELICS[i]);
-   if(avail.length){var r=avail[Math.floor(Math.random()*avail.length)];S.relic[r.id]=1;relTxt=' 🗡 '+r.n;}
-  }
-  S.log.unshift('🏆 '+RAID[l].n+': +'+g+' 💠'+relTxt);
-  toast('🏆 Победа! +'+g+' 💠'+relTxt);
-  beep(660,0.12);setTimeout(function(){beep(880,0.12);},120);setTimeout(function(){beep(1100,0.2);},240);
- }else{
-  var lose=Math.round(S.ess*(0.10+Math.random()*0.05));S.ess-=lose;
-  S.log.unshift('💀 '+RAID[l].n+': −'+lose+' 💠');
-  toast('💀 Отряд разбит. −'+lose+' 💠');
-  beep(220,0.3);
- }
- S.log=S.log.slice(0,6);
- var f=Math.min(10,1+Math.floor(S.raidWins/5));
- if(f>S.floor){S.floor=f;toast('⬆ Новый этаж: '+f+'! Открыты новые здания');beep(520,0.15);setTimeout(function(){beep(780,0.25);},150);}
- checkGuide();checkAch();save();renderAll();
-}
-function checkAch(){
- for(var i=0;i<ACH.length;i++){var a=ACH[i];
-  if(!S.ach[a.id]&&achOk(a.id)){S.ach[a.id]=1;S.star+=10;toast('🏅 Достижение: '+a.n+' (+10 ⭐)');beep(980,0.2);}
- }
-}
-function tryBuild(i){
- if(!sel)return;
- var b=BLD[sel];
- if(S.ore<bCost(sel)){toast('Не хватает руды: нужно '+bCost(sel));beep(200,0.15);return;}
- S.ore-=bCost(sel);
- S.grid[i]={k:sel,lvl:1,done:false,t:Date.now()+45000,dur:45000};
- sel=null;S.tasks.tBuild++;
- toast('🏗 Стройка началась');
- beep(300,0.12);setTimeout(function(){beep(420,0.15);},120);
- checkAch();checkGuide();save();renderAll();
-}
-function openSheet(i){
- var c=S.grid[i],b=BLD[c.k];
- var up=upCost(c);
- var html='<div class="sheet"><div class="sh-h">'+b.i+' '+b.n+' · ур. '+c.lvl+'</div><div class="sh-d">'+effTxt(c)+'</div><div class="sh-lore">'+b.lore+'</div>';
- html+='<button class="btn" data-act="upg" data-i="'+i+'">Улучшить — '+up+' ⛏</button>';
- if(!c.done&&S.spd>0)html+='<button class="btn ghost" data-act="spd" data-i="'+i+'">⚡ Ускорить стро́йку (1)</button>';
- html+='<button class="btn warn" data-act="rm" data-i="'+i+'">Снести (+50% руды)</button>';
- html+='<button class="btn ghost" data-act="close">Закрыть</button></div>';
- showSheet(html);
-}
-function effTxt(c){
- var b=BLD[c.k];
- if(b.r)return '+'+(b.r*c.lvl).toFixed(1)+' руды/с';
- if(b.p)return '+'+(b.p*c.lvl)+' к силе';
- if(b.cap)return '+'+(b.cap*c.lvl)+' к пределу';
- if(b.h)return '+'+Math.round(b.h*c.lvl*100)+'% добычи';
- if(b.adj)return '+10% за соседнюю шахту';
- if(b.relic)return '+'+(b.relic*100).toFixed(0)+'% к шансу реликвии';
- return '';
-}
-function floatNum(i,txt){
- var cell=document.querySelector('.cell[data-i="'+i+'"]');
- if(!cell)return;
- var d=document.createElement('div');d.className='fl';d.textContent=txt;cell.appendChild(d);
- setTimeout(function(){d.remove();},900);
-}
-function buyRes(id){
- var lvl=S.res[id];if(lvl>=10){toast('Максимум');return;}
- var c=resCost(lvl);
- if(S.ess<c){toast('Нужно '+c+' 💠');beep(200,0.15);return;}
- S.ess-=c;S.res[id]++;beep(760,0.12);save();renderAll();
-}
-function takeCal(){
- if(S.cal.taken){toast('Уже получено сегодня');return;}
- var r=calReward(S.cal.n);
- var mult=1+Math.min(S.streak.n,7)*0.05;
- var parts=[];
- if(r.o){var v=Math.round(r.o*mult);S.ore=Math.min(capTotal(),S.ore+v);parts.push('+'+v+' ⛏');}
- if(r.e){var v2=Math.round(r.e*mult);S.ess+=v2;parts.push('+'+v2+' 💠');}
- if(r.s){S.star+=r.s;parts.push('+'+r.s+' ⭐');}
- S.cal.taken=true;S.cal.n++;
- toast('🎁 Награда дня: '+parts.join(', '));
- beep(600,0.15);save();renderAll();
-}
-function collectTasks(){
- if(S.tasks.col){toast('Уже получено');return;}
- if(S.tasks.tOre<200||S.tasks.tBuild<2||S.tasks.tRaid<1){toast('Задания ещё не выполнены');return;}
- S.tasks.col=true;S.ess+=5;S.star+=15;
- toast('✅ Задания дня: +5 💠, +15 ⭐');
- beep(800,0.18);save();renderAll();
-}
-function buy(id){
- if(id==='offer'&&S.offer){toast('Уже куплено');return;}
- if(id==='skin'&&S.skin){toast('Уже куплено');return;}
- for(var i=0;i<SHOP.length;i++){
-  if(SHOP[i].id!==id)continue;
-  var it=SHOP[i];
-  if(S.star<it.pr){toast('Не хватает ⭐');beep(200,0.15);return;}
-  S.star-=it.pr;
-  if(id==='offer'){S.spd+=5;S.ore=Math.min(capTotal(),S.ore+1000);S.offer=true;}
-  if(id==='set'){S.spd+=5;S.ore=Math.min(capTotal(),S.ore+500);}
-  if(id==='chest'){S.spd+=15;S.ess+=30;}
-  if(id==='pack'){S.packEnd=Date.now()+30*86400000;}
-  if(id==='skin'){S.skin=true;}
-  toast('🛍 Куплено: '+it.n);
-  beep(700,0.15);
- }
- save();renderAll();
-}
-function prestige(){
- if(S.floor<5){toast('Погружение откроется с 5-го этажа');return;}
- var gain=S.floor*5;
- if(!confirm('Погружение сбросит город, но даст '+gain+' ядер (+3% добычи каждый). Реликвии и ⭐ сохранятся. Продолжить?'))return;
- var keep={star:S.star,cores:S.cores+gain,prestige:S.prestige+1,relic:S.relic,ach:S.ach,skin:S.skin,offer:S.offer,code:S.code};
- S=def();
- S.star=keep.star;S.cores=keep.cores;S.prestige=keep.prestige;S.relic=keep.relic;S.ach=keep.ach;S.skin=keep.skin;S.offer=keep.offer;S.code=keep.code;
- save();renderAll();
- toast('🌀 Погружение! +'+gain+' ядер');
-}
-function share(){
- var txt='Мой подземный город — этаж '+S.floor+', сила отряда '+power()+'. Присоединяйся! Код: '+S.code;
- try{
-  if(TG&&TG.HapticFeedback)TG.HapticFeedback.impactOccurred('light');
- }catch(e){}
- if(navigator.share){navigator.share({text:txt}).catch(function(){});}
- else if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){toast('Скопировано');});}
- else toast(txt);
-}
-function offline(){
- var now=Date.now();var dt=(now-S.last)/1000;
- if(dt>60&&prodRate()>0){
-  var gain=Math.min(dt,14400)*prodRate();
-  gain=Math.min(gain,Math.max(0,capTotal()-S.ore));
-  if(gain>1){
-   S.ore+=gain;S.totalOre+=gain;
-   showSheet('<div class="mbox"><div class="sh-h">⏰ С возвращением!</div><div class="sh-d">Пока тебя не было ('+Math.round(Math.min(dt,14400)/60)+' мин), город добыл '+Math.floor(gain)+' руды.</div><button class="btn" data-act="close">Отлично</button></div>',true);
-  }
- }
- S.last=now;
-}
+          area.appendChild(cell);
+        }
+      }
+    }
+    function renderGuide() {
+      const chip = document.getElementById('guide-chip');
+      if (S.guideStep === 1) {
+        chip.textContent = 'Гайд: Постройте шахту на любой клетке';
+        chip.classList.add('show');
+      } else if (S.guideStep === 2) {
+        chip.textContent = 'Гайд: Постройте склад для увеличения лимита руды';
+        chip.classList.add('show');
+      } else if (S.guideStep === 3) {
+        chip.textContent = 'Гайд: Постройте казарму, чтобы открыть Походы';
+        chip.classList.add('show');
+      } else {
+        chip.classList.remove('show');
+      }
+    }
+    function toast(msg) {
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.textContent = msg;
+      document.body.appendChild(el);
+      setTimeout(() => {
+        el.classList.add('show');
+        setTimeout(() => {
+          el.classList.remove('show');
+          setTimeout(() => el.remove(), 200);
+        }, 2000);
+      }, 50);
+    }
 
-var TAB='city',sel=null;
-function setTab(t){TAB=t;document.querySelectorAll('.tb').forEach(function(b){b.classList.toggle('on',b.dataset.t===t);});renderView();window.scrollTo(0,0);}
-function renderAll(){renderTop();renderGuide();renderView();}
-function renderTop(){
- $('#ore').textContent=fmt(S.ore);
- $('#rate').textContent='+'+prodRate().toFixed(1)+'/с';
- $('#ess').textContent=fmt(S.ess);
- $('#star').textContent=S.star;
- $('#spd').textContent=S.spd;
- $('#pow').textContent=power();
- $('#flv').textContent='Этаж '+S.floor+(S.skin?' 🌟':'');
- $('#car').style.display=(S.carEnd>Date.now())?'inline-block':'none';
-}
-function renderGuide(){
- var g=$('#guide');
- if(S.guide<GUIDE.length){g.style.display='inline-block';g.textContent='👉 '+GUIDE[S.guide].n;}
- else g.style.display='none';
-}
-function chancePct(l){
- var e=RAID[l].e,P=power();
- var p=Math.max(0.05,Math.min(0.95,P/(P+e)));
- p=Math.min(0.97,p*(1+relicSum('win')*0.15));
- return Math.round(p*100)+'%';
-}
-function renderView(){
- var v=$('#view'),h='';
- if(TAB==='city'){
-  h+='<div id="grid">';
-  for(var i=0;i<36;i++){
-   var c=S.grid[i];
-   if(S.sparkIdx===i){h+='<div class="cell spark" data-i="'+i+'">✨</div>';continue;}
-   if(c){
-    var cls='cell b'+(c.done?'':' pend');
-    h+='<div class="'+cls+'" data-i="'+i+'">'+BLD[c.k].i+'<span class="lv">'+c.lvl+'</span>';
-    if(!c.done)h+='<span class="pr">'+Math.max(0,Math.round((1-(c.t-Date.now())/c.dur)*100))+'%</span>';
-    h+='</div>';
-   }else h+='<div class="cell" data-i="'+i+'">'+(sel?'➕':'')+'</div>';
-  }
-  h+='</div><div class="mini">Тап по клетке — построить. Тап по зданию — улучшить. Рынок любит шахты по соседству.</div><div id="pal">';
-  for(var j=0;j<RK.length;j++){
-   var k=RK[j],b=BLD[k];
-   if(b.u>S.floor)continue;
-   h+='<div class="pal'+(sel===k?' sel':'')+'" data-k="'+k+'"><span class="pi">'+b.i+'</span><span class="pn">'+b.n+'</span><span class="pc">'+bCost(k)+' ⛏</span></div>';
-  }
-  h+='</div>';
- }
- if(TAB==='raid'){
-  h+='<h2 class="sec">💪 Сила отряда: '+power()+'</h2>';
-  for(var l=0;l<3;l++){
-   var r=RAID[l],cd=S.cool>Date.now();
-   h+='<div class="row" style="border-color:'+r.col+'"><h3>⚔️ '+r.n+' поход</h3><div class="d">Враг: '+r.e+' · Награда: '+r.lo+'–'+r.hi+' 💠 · Реликвия: '+Math.round(r.rel*100)+'%</div>';
-   h+='<div class="d">Шанс победы: <b>'+chancePct(l)+'</b></div>';
-   h+='<button class="btn" data-r="'+l+'"'+(cd?' disabled':'')+'>Отправить отряд'+(cd?' ('+mmss(S.cool-Date.now())+')':'')+'</button></div>';
-  }
-  h+='<div class="mini">До этажа '+(S.floor+1)+': осталось побед: '+Math.max(0,S.floor*5-S.raidWins)+'</div>';
-  h+='<h2 class="sec">Журнал походов</h2><div class="row rlog">';
-  if(!S.log.length)h+='<div class="re">Пока пусто. Отправь отряд!</div>';
-  for(var m=0;m<S.log.length;m++)h+='<div class="re">'+S.log[m]+'</div>';
-  h+='</div>';
- }
- if(TAB==='shop'){
-  h+='<div class="mini" style="margin-bottom:8px">⭐ — демо-валюта. В Telegram реальные платежи идут в Stars ([TG-INTEGRATION] в коде).</div>';
-  for(var s=0;s<SHOP.length;s++){
-   var it=SHOP[s];
-   var bought=(it.id==='offer'&&S.offer)||(it.id==='skin'&&S.skin);
-   h+='<div class="row"><h3>'+it.i+' '+it.n+'</h3><div class="d">'+it.d+'</div>';
-   h+='<button class="btn" data-buy="'+it.id+'"'+(bought?' disabled':'')+'>Купить — '+it.pr+' ⭐'+(bought?' ✓':'')+'</button></div>';
-  }
- }
- if(TAB==='more'){
-  h+='<h2 class="sec">Календарь на 7 дней</h2><div class="row">';
-  h+='<div class="d">Стрик: '+S.streak.n+' дн. (до +35% наград)</div><div class="calrow">';
-  var names=['⛏','⛏','💠','⭐','⛏','💠','⭐'];
-  for(var d2=0;d2<7;d2++){
-   var cls='cd'+(d2<S.cal.n?' got':'')+(d2===S.cal.n?' now':'');
-   h+='<div class="'+cls+'">День '+(d2+1)+'<br>'+names[d2]+'</div>';
-  }
-  h+='</div><button class="btn" data-act="cal"'+(S.cal.taken?' disabled':'')+'>Забрать награду дня</button></div>';
-  h+='<h2 class="sec">Задания дня</h2><div class="row">';
-  var tl=[{n:'Добудь 200 руды',p:S.tasks.tOre,g:200},{n:'Построй 2 здания',p:S.tasks.tBuild,g:2},{n:'Выиграй 1 поход',p:S.tasks.tRaid,g:1}];
-  for(var t2=0;t2<3;t2++){
-   var tk=tl[t2];var pp=Math.min(100,Math.round(tk.p/tk.g*100));
-   h+='<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span>'+tk.n+'</span><span class="mini">'+Math.min(tk.p,tk.g)+'/'+tk.g+'</span></div><div class="prog"><i style="width:'+pp+'%"></i></div></div>';
-  }
-  h+='<button class="btn" data-act="tasks"'+(S.tasks.col?' disabled':'')+'>Забрать (+5 💠, +15 ⭐)'+(S.tasks.col?' ✓':'')+'</button></div>';
-  h+='<h2 class="sec">Исследования 💠</h2>';
-  for(var q=0;q<RES.length;q++){
-   var rs=RES[q],lvl=S.res[rs.id],cost=resCost(lvl);
-   h+='<div class="row"><h3>'+rs.n+' · ур. '+lvl+'</h3><div class="d">'+rs.d+'</div>';
-   h+='<button class="btn" data-res="'+rs.id+'"'+(lvl>=rs.max?' disabled':'')+'>'+(lvl>=rs.max?'Максимум':'Улучшить — '+cost+' 💠')+'</button></div>';
-  }
-  h+='<h2 class="sec">Реликвии ('+Object.keys(S.relic).length+'/'+RELICS.length+')</h2>';
-  for(var w=0;w<RELICS.length;w++){
-   var rl=RELICS[w],got=S.relic[rl.id];
-   h+='<div class="row'+(got?' gold':'')+'"><h3>'+(got?'🗡 ':'🔒 ')+rl.n+'</h3><div class="d">'+rl.d+'</div></div>';
-  }
-  h+='<h2 class="sec">Достижения</h2>';
-  for(var z=0;z<ACH.length;z++){
-   var a=ACH[z],ok=S.ach[a.id];
-   h+='<div class="row"><h3>'+(ok?'✅ ':'⬜ ')+a.n+'</h3><div class="d">'+a.d+'</div></div>';
-  }
-  h+='<h2 class="sec">Прочее</h2>';
-  h+='<div class="row"><div class="d">Ядра: '+S.cores+' (+'+Math.round(S.cores*corePct()*100)+'% добычи навсегда) · Погружений: '+S.prestige+'</div>';
-  h+='<button class="btn" data-act="prestige">🌀 Погружение'+(S.floor<5?' (с 5-го этажа)':'')+'</button>';
-  h+='<button class="btn ghost" data-act="share">📣 Поделиться городом</button>';
-  h+='<button class="btn warn" data-act="reset">🗑 Сбросить прогресс</button></div>';
- }
- v.innerHTML=h;
-}
-document.addEventListener('click',function(e){
- var el=e.target.closest('[data-i],[data-k],[data-r],[data-act],[data-buy],[data-res]');
- if(!el)return;
- if(el.dataset.i!==undefined&&el.dataset.i!==''){
-  var i=+el.dataset.i;
-  if(S.sparkIdx===i){tapSpark(i);return;}
-  if(S.grid[i])openSheet(i);else tryBuild(i);
-  return;
- }
- if(el.dataset.k){sel=(sel===el.dataset.k)?null:el.dataset.k;beep(500,0.06);renderAll();return;}
- if(el.dataset.r!==undefined&&el.dataset.r!==''){goRaid(+el.dataset.r);return;}
- if(el.dataset.buy){buy(el.dataset.buy);return;}
- if(el.dataset.res){buyRes(el.dataset.res);return;}
- var a=el.dataset.act;
- if(a==='tab')setTab(el.dataset.t);
- else if(a==='cal')takeCal();
- else if(a==='tasks')collectTasks();
- else if(a==='share')share();
- else if(a==='prestige')prestige();
- else if(a==='reset'){if(confirm('Сбросить весь прогресс?')){localStorage.removeItem('magnat3');S=def();save();renderAll();}}
- else if(a==='close')hideSheet();
- else if(a==='upg'){
-  var ci=+el.dataset.i,c2=S.grid[ci],uc=upCost(c2);
-  if(S.ore<uc){toast('Не хватает руды');beep(200,0.15);return;}
-  S.ore-=uc;c2.lvl++;S.seen[c2.k]=1;
-  beep(500,0.12);hideSheet();save();renderAll();
- }
- else if(a==='spd'){
-  var si=+el.dataset.i;
-  if(S.spd<1){toast('Нет ускорений');return;}
-  S.spd--;S.grid[si].t=Date.now();hideSheet();save();renderAll();
- }
- else if(a==='rm'){
-  var ri=+el.dataset.i,c3=S.grid[ri];
-  S.ore=Math.min(capTotal(),S.ore+Math.round(BLD[c3.k].c*0.5));
-  delete S.grid[ri];hideSheet();save();renderAll();
- }
-});
-$('#ov').addEventListener('click',function(e){if(e.target===this)hideSheet();});
-function init(){
- offline();renderAll();
- setInterval(function(){
-  tick();renderTop();
-  if(TAB==='city'){updateCells();renderGuide();}
-  if(TAB==='raid')renderView();
- },1000);
-}
-function updateCells(){
- var all=document.querySelectorAll('.cell.pend');
- if(!all.length)return;
- var done=false;
- all.forEach(function(el){
-  var i=+el.dataset.i,c=S.grid[i];if(!c)return;
-  if(Date.now()>=c.t){done=true;return;}
-  var pr=el.querySelector('.pr');
-  if(pr)pr.textContent=Math.max(0,Math.round((1-(c.t-Date.now())/c.dur)*100))+'%';
- });
- if(done)renderAll();
-}
-init();
-</script>
+    // --- LOGIC ---
+    function onCellClick(id) {
+      if (S.raidInProgress) return;
+      const b = S.buildings[id];
+      if (!b) {
+        // Пустая клетка — предложить постройку
+        if (S.ore >= 100 && S.guideStep === 1) {
+          build('mine', id);
+          S.guideStep = 2;
+          save();
+          renderGuide();
+          toast('Шахта построена!');
+        } else if (S.ore >= 200 && S.guideStep === 2) {
+          build('storage', id);
+          S.guideStep = 3;
+          save();
+          renderGuide();
+          toast('Склад построен!');
+        } else if (S.ore >= 300 && S.guideStep === 3) {
+          build('barracks', id);
+          S.guideStep = 4;
+          save();
+          renderGuide();
+          toast('Казарма построена! Теперь доступны Походы.');
+        } else if (S.ore >= 100) {
+          build('mine', id);
+          save();
+          toast('Шахта построена!');
+        } else {
+          toast('Недостаточно руды!');
+        }
+      } else {
+        // Клетка занята — апгрейд
+        if (b.type === 'mine' && S.ore >= 100 * b.level) {
+          b.level++;
+          S.ore -= 100 * b.level;
+          save();
+          renderCity();
+          renderStats();
+          toast('Шахта улучшена!');
+        } else if (b.type === 'storage' && S.ore >= 150 * b.level) {
+          b.level++;
+          S.ore -= 150 * b.level;
+          save();
+          renderCity();
+          renderStats();
+          toast('Склад улучшен!');
+        } else if (b.type === 'barracks' && S.ore >= 200 * b.level) {
+          b.level++;
+          S.ore -= 200 * b.level;
+          save();
+          renderCity();
+          renderStats();
+          toast('Казарма улучшена!');
+        } else {
+          toast('Недостаточно руды для апгрейда!');
+        }
+      }
+    }
+    function build(type, id) {
+      const costMap = { mine: 100, storage: 200, barracks: 300 };
+      S.ore -= costMap[type];
+      S.buildings[id] = { type, level: 1 };
+      save();
+      renderCity();
+      renderStats();
+    }
+    function onSparkClick() {
+      if (S.sparkCell) {
+        const reward = Math.floor(Math.random() * 50) + 20;
+        S.ore += reward;
+        save();
+        renderStats();
+        toast('+ ' + reward + ' руды!');
+        removeSpark();
+      }
+    }
+    function removeSpark() {
+      S.sparkCell = null;
+      renderCity();
+    }
+    function spawnSpark() {
+      if (S.sparkCell) return;
+      const cells = Object.keys(S.buildings);
+      if (cells.length === 0) return;
+      const id = cells[Math.floor(Math.random() * cells.length)];
+      S.sparkCell = id;
+      renderCity();
+      if (S.sparkTimer) clearTimeout(S.sparkTimer);
+      S.sparkTimer = setTimeout(removeSpark, 90000); // 90 сек
+    }
+
+    // --- RAID ---
+    function startRaid(lvl) {
+      if (S.raidInProgress) return;
+      S.raidInProgress = true;
+      const chances = {1: 0.9, 2: 0.7, 3: 0.5};
+      const rewards = {1: {ore: 50, star: 1}, 2: {ore: 120, star: 3}, 3: {ore: 300, star: 8}};
+      const chance = chances[lvl];
+      const reward = rewards[lvl];
+
+      // Прогресс бар
+      const fill = document.querySelector('.progress-fill');
+      if (fill) fill.style.width = '0%';
+      let p = 0;
+      const interval = setInterval(() => {
+        p += 5;
+        if (fill) fill.style.width = p + '%';
+        if (p >= 100) {
+          clearInterval(interval);
+          finishRaid(chance, reward);
+        }
+      }, 100);
+
+      // Блокируем кнопки
+      document.querySelectorAll('.btn').forEach(b => b.disabled = true);
+    }
+    function finishRaid(chance, reward) {
+      S.raidInProgress = false;
+      const win = Math.random() < chance;
+      if (win) {
+        S.ore += reward.ore;
+        S.star += reward.star;
+        S.raidsWon++;
+        toast('Победа! Получено: ' + reward.ore + ' руды, ' + reward.star + ' звёзд.');
+      } else {
+        toast('Поражение! Но опыт получен.');
+      }
+      save();
+      renderStats();
+      document.querySelectorAll('.btn').forEach(b => b.disabled = false);
+      document.getElementById('raid-log').textContent = S.raidsWon;
+    }
+
+    // --- SHOP ---
+    function buyUpgrade(key) {
+      if (S.raidInProgress) return;
+      const costs = {
+        ore_mult: { type: 'ore', val: 500 },
+        star_mult: { type: 'star', val: 200 },
+        auto_mine: { type: 'ore', val: 1000 },
+        speed_pack: { type: 'star', val: 100 }
+      };
+      const c = costs[key];
+      if (!c) return;
+      const has = c.type === 'ore' ? S.ore : S.star;
+      if (has >= c.val) {
+        if (c.type === 'ore') S.ore -= c.val;
+        else S.star -= c.val;
+        if (key === 'ore_mult') S.upgrades.ore_mult *= 1.2;
+        if (key === 'star_mult') S.upgrades.star_mult *= 1.2;
+        if (key === 'auto_mine') S.upgrades.auto_mine = true;
+        if (key === 'speed_pack') S.speed += 10;
+        save();
+        renderStats();
+        toast('Улучшение куплено!');
+      } else {
+        toast('Недостаточно ресурсов!');
+      }
+    }
+
+    // --- VIEWS ---
+    function switchView(view) {
+      if (S.raidInProgress) return;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.closest('.tab').classList.add('active');
+
+      document.getElementById('city-area').style.display = 'none';
+      document.getElementById('raid-area').style.display = 'none';
+      document.getElementById('shop-area').style.display = 'none';
+      document.getElementById('more-area').style.display = 'none';
+
+      if (view === 'city') document.getElementById('city-area').style.display = 'flex';
+      if (view === 'raid') document.getElementById('raid-area').style.display = 'flex';
+      if (view === 'shop') document.getElementById('shop-area').style.display = 'block';
+      if (view === 'more') document.getElementById('more-area').style.display = 'block';
+    }
+
+    // --- TICK ---
+    function tick() {
+      const now = Date.now();
+      const dt = (now - S.lastTick) / 1000; // сек
+      S.lastTick = now;
+
+      // Добыча
+      for (const id in S.buildings) {
+        const b = S.buildings[id];
+        if (b.type === 'mine') {
+          const rate = 10 * b.level * S.upgrades.ore_mult;
+          S.ore += rate * dt;
+        }
+      }
+      // Авто-добыча
+      if (S.upgrades.auto_mine) {
+        const rate = 5 * S.upgrades.ore_mult;
+        S.ore += rate * dt;
+      }
+
+      renderStats();
+      renderCity();
+
+      // Искра
+      if (Math.random() < 0.001 * dt) { // примерно раз в 3-5 мин
+        spawnSpark();
+      }
+
+      saveIfNeeded();
+    }
+    function saveIfNeeded() {
+      if (Date.now() - S.lastSave > 30000) save();
+    }
+
+    // --- WELCOME BACK ---
+    function checkWelcomeBack() {
+      const last = localStorage.getItem('magnat_v4_last_visit');
+      if (!last) {
+        localStorage.setItem('magnat_v4_last_visit', Date.now());
+        return;
+      }
+      const diff = (Date.now() - parseInt(last)) / (1000 * 60 * 60 * 24);
+      if (diff > 0.1) { // > 2.4 часа
+        const offlineOre = Math.floor(diff * 100); // примерная формула
+        S.offlineOre = offlineOre;
+        S.ore += offlineOre;
+        document.getElementById('welcome-days').textContent = diff.toFixed(1);
+        document.getElementById('welcome-ore').textContent = offlineOre;
+        document.getElementById('welcome-back').classList.add('show');
+        save();
+        renderStats();
+      }
+      localStorage.setItem('magnat_v4_last_visit', Date.now());
+    }
+    function closeWelcome() {
+      document.getElementById('welcome-back').classList.remove('show');
+    }
+
+    // --- INIT ---
+    function init() {
+      try {
+        load();
+        checkWelcomeBack();
+        renderStats();
+        renderCity();
+        renderGuide();
+
+        // Tabs delegation
+        document.addEventListener('click', (e) => {
+          const tab = e.target.closest('.tab');
+          if (tab) {
+            const view = tab.dataset.view;
+            switchView(view);
+          }
+        });
+
+        // Start tick
+        S.lastTick = Date.now();
+        setInterval(tick, 100); // 100ms для плавности
+
+        hideError();
+      } catch(e) {
+        showError('Ошибка инициализации: ' + e.message);
+      }
+    }
+
+    // Reset
+    function resetProgress() {
+      if (!confirm('Вы уверены? Весь прогресс будет удалён!')) return;
+      localStorage.removeItem('magnat_v4');
+      location.reload();
+    }
+
+    // Start
+    init();
+  </script>
 </body>
 </html>
