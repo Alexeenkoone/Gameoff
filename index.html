@@ -3,16 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Подземный магнат v7</title>
+<title>Магнат глубин v8</title>
 <style>
 :root{--bg:#0e0b08;--panel:#1c1610;--panel2:#261d12;--brz:#c9a35c;--brz2:#e6c885;--tx:#e8ddc8;--dim:#8f8270;--bd:#3a2f1e;--dgr:#ff5252;--grn:#7ed957;}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{margin:0;height:100vh;overflow:hidden;background:linear-gradient(180deg,#17110a,#0b0805);color:var(--tx);font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;display:flex;flex-direction:column;}
-header{flex-shrink:0;background:linear-gradient(180deg,#241c12,#1a140c);border-bottom:2px solid var(--bd);padding:7px 8px;display:flex;align-items:center;gap:8px;overflow-x:auto;}
-.stats{display:flex;gap:4px;flex-shrink:0;}
+header{position:sticky;top:0;z-index:40;flex-shrink:0;background:linear-gradient(180deg,#241c12,#1a140c);border-bottom:2px solid var(--bd);padding:5px 8px 7px;display:flex;flex-direction:column;gap:5px;}
+.stats{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;}
+.stats .chip{font-size:11px;padding:2px 6px;}
 .chip{background:#0f0b07;border:1px solid var(--bd);border-radius:12px;padding:3px 7px;font-size:12px;white-space:nowrap;}
 .chip b{color:var(--brz2);}
-nav{flex:1;display:flex;gap:5px;min-width:290px;}
+nav{display:flex;gap:5px;width:100%;}
 .tab{flex:1;padding:8px 3px;text-align:center;font-size:12px;cursor:pointer;background:#0f0b07;border:1px solid var(--bd);border-radius:9px;color:var(--dim);}
 .tab.active{background:linear-gradient(180deg,#c9a35c,#9c7b3c);color:#1a1206;font-weight:700;border-color:var(--brz);}
 main{flex:1;overflow-y:auto;padding:10px 10px 30px;}
@@ -108,6 +109,42 @@ h2{color:var(--brz2);text-align:center;margin:4px 0 10px;font-size:19px;text-sha
 .xpline>i{display:block;height:100%;background:linear-gradient(90deg,#4a7ab0,#7ab0e0);}
 #err{position:fixed;bottom:0;left:0;right:0;background:#5c1414;color:#ffb0b0;font-size:12px;padding:8px 12px;display:none;z-index:99;white-space:pre-wrap;}
 #err.show{display:block;}
+/* === RPG-стиль v7.3 === */
+.card,.icard,#ovbox,.scene{position:relative;border:2px solid #5a4726;border-radius:14px;
+ box-shadow:0 0 0 1px #241a0c,0 6px 18px rgba(0,0,0,.65),inset 0 0 30px rgba(0,0,0,.55);
+ background:linear-gradient(180deg,#2a2013 0%,#1c150c 60%,#150f08 100%);}
+.card::before,.icard::before,.scene::before{content:'';position:absolute;inset:3px;
+ border:1px solid rgba(201,163,92,.28);border-radius:10px;pointer-events:none;}
+.card::after,.icard::after,.scene::after{content:'';position:absolute;top:6px;left:8px;width:9px;height:9px;
+ background:radial-gradient(circle at 35% 35%,#e6c885,#7a5c22);border-radius:50%;
+ box-shadow:0 0 4px rgba(230,200,133,.8);pointer-events:none;}
+.divider{display:flex;align-items:center;gap:10px;max-width:460px;margin:14px auto 10px;color:var(--brz);}
+.divider::before,.divider::after{content:'';flex:1;height:2px;
+ background:linear-gradient(90deg,transparent,#7a5c22,transparent);}
+.divider span{font-size:13px;letter-spacing:2px;}
+.doll .slot{border:2px solid #4a3a20;border-radius:11px;
+ background:linear-gradient(135deg,rgba(201,163,92,.10) 0%,transparent 40%),linear-gradient(180deg,#241b10,#120d07);
+ box-shadow:inset 0 0 12px rgba(0,0,0,.7),0 2px 5px rgba(0,0,0,.5);}
+.doll .slot::before{content:'';position:absolute;inset:3px;border:1px solid rgba(201,163,92,.22);
+ border-radius:8px;pointer-events:none;}
+.doll .slot .ic{opacity:.55;filter:grayscale(.6) drop-shadow(0 0 3px rgba(201,163,92,.5));}
+.doll .slot.full{border-color:var(--rar,#c9a35c);
+ box-shadow:inset 0 0 12px rgba(0,0,0,.7),0 0 12px rgba(201,163,92,.35);}
+.doll .slot.full::before{border-color:rgba(230,200,133,.45);}
+.doll .slot.full .ic{opacity:1;filter:drop-shadow(0 0 5px rgba(230,200,133,.8));}
+.subtabs .subtab{border:1px solid #4a3a20;border-radius:9px;
+ background:linear-gradient(180deg,#241b10,#150f08);box-shadow:inset 0 0 8px rgba(0,0,0,.6);}
+.subtabs .subtab.active{background:linear-gradient(180deg,#c9a35c,#8a6a30);
+ color:#1a1206;font-weight:700;box-shadow:0 0 10px rgba(201,163,92,.5);}
+.bag .bcell{border:2px solid #4a3a20;
+ background:linear-gradient(135deg,rgba(201,163,92,.08),transparent 45%),#161007;
+ box-shadow:inset 0 0 10px rgba(0,0,0,.7);}
+/* === Новелла v8 === */
+#ovbox.story{background:linear-gradient(180deg,#1b150c,#100b06);padding:22px 20px;}
+.story .who{text-align:center;color:var(--brz2);font-weight:700;font-size:15px;letter-spacing:1.5px;margin-bottom:4px;}
+.story .who small{display:block;color:var(--dim);font-weight:400;font-size:11px;letter-spacing:0;}
+.story .txt{font-style:italic;color:#e3d6bd;font-size:14.5px;line-height:1.7;text-align:left;margin:12px 0;}
+.story .hr{height:2px;background:linear-gradient(90deg,transparent,#7a5c22,transparent);margin:10px 0;}
 </style>
 </head>
 <body>
@@ -140,21 +177,14 @@ h2{color:var(--brz2);text-align:center;margin:4px 0 10px;font-size:19px;text-sha
   <section class="view" id="v_raid"><div id="raidBox"></div></section>
   <section class="view" id="v_hero"><div id="heroBox"></div></section>
   <section class="view" id="v_shop"><div id="shopBox"></div></section>
-  <section class="view" id="v_more">
-    <h2>⋮ Ещё</h2>
-    <div class="card">
-      <p class="sub">Версия v7. Код приглашения: <b id="refc">—</b></p>
-      <button class="btn" data-act="share">📤 Поделиться городом</button>
-      <p style="margin:14px 0 2px;"><button class="btn red" data-act="reset">🗑 Сброс прогресса</button></p>
-    </div>
-  </section>
+  <section class="view" id="v_more"><div id="moreBox"></div></section>
 </main>
 <div id="toasts"></div>
 <div id="overlay"><div id="ovbox"></div></div>
 <div id="err"></div>
 <script>
 'use strict';
-var KEY='magnat_v7';
+var KEY='magnat_v8';
 var RAR={1:{n:'Обычный',c:'#9a9a9a'},2:{n:'Необычный',c:'#7ed957'},3:{n:'Редкий',c:'#4aa3ff'},4:{n:'Эпический',c:'#b56cff'},5:{n:'Легендарный',c:'#ff4d4d'}};
 var SLOTN={weapon:'Оружие',armor:'Доспех',helm:'Шлем',amulet:'Амулет',ring:'Кольцо',boots:'Сапоги',pack:'Рюкзак'};
 var SLOTI={weapon:'⚔',armor:'🛡',helm:'⛑',amulet:'📿',ring:'💍',boots:'👢',pack:'🎒'};
@@ -210,10 +240,38 @@ var DEEPS={
  d3:{n:'Бездна',lvl:15,cost:700,cd:10,ehp:1600,eatk:95,rOre:1800,rStar:25,xp:450,en:'Пожиратель глубин',ei:'🐙',w:[0,0,15,45,40]}};
 var HERO_Q=['Умри, проклятая нечесть!','Тьма отступает!','За рудник!','Глубины, примите сталь!','Ещё удар — и тьма ляжет!'];
 var ENEMY_Q=['Мы придём за тобой…','Плоть — добыча глубин!','Ты не пройдёшь, рудокоп!','Кости — в подземелье!'];
-function freshS(){return{ore:150,star:0,spd:3,floor:1,wins:0,buildings:{},oreMult:1,autoMine:0,
+var BOSSN=['Надзиратель соляных ям','Хранитель вагонеток','Голос шахты','Дыхание вентиляции','Стальная вдова','Смотритель колодца','Эхо-магнат Первый','Эхо-магнат Последний','Страж Раны','Сердце рудника'];
+var BOSSQ=['— Я следил за тобой с первого шага, магнат.','— Мои механизмы ещё дышат. Стало быть, рудник жив.','— Руда спит. Не буди её, наследник.','— Каждый из вас приносил нам. Теперь ты принесёшь.','— Дед твой слышал мой голос. Слышишь ли ты свой?','— Возьми всё. Как брали до тебя. Как возьмут после.'];
+function bossOf(fl){var t=Math.floor(fl/5);var i=Math.min(BOSSN.length-1,t-1);
+ return{n:BOSSN[i],ei:'💀',ehp:Math.round(260*Math.pow(1.55,t-1)),eatk:Math.round(26*Math.pow(1.35,t-1)),
+  rOre:Math.round(500*Math.pow(1.6,t-1)),rStar:10+t*5,xp:150+t*80,q:BOSSQ[i]||'— Глубины помнят.'};}
+var DIARY=[
+ 'Письмо первое. «Внук. Шахта не истощилась. Она ушла вниз. Копай — и помни: глубины помнят тех, кто берёт лишнее». ',
+ 'Ярусы нижние. Мы пробили соляную жилу и услышали стук. С той стороны. Три удара — пауза — три удара.',
+ 'Люди Тени перешли к нам после Падения. Торгуют осколками небес. Спрашивать, откуда осколки, я не стал.',
+ 'Вагонетка №4 вернулась с грузом, которого мы не грузили. Порожняком ушла вниз — полная поднялась.',
+ 'Руда в нижних ярусах тёплая. Старый Крайт говорит: «Она спит». Я больше не спорю.',
+ 'Мы нашли сердце рудника. Оно билось в камне, как сердце в груди. Крайт плакал и молился. Больше я его не видел.',
+ 'Мы выкачали первую жилу из сердца. Через день шахта начала говорить с нами — стуком по трубам.',
+ 'Я запретил выкачку. Стражи отступили. Магистр рудников назвал меня трусом и изгнал. Он прав. И всё же…',
+ 'Если ты читаешь это — ты магнат. Прости меня. Прости нас всех. Глубины взяли плату с каждого.',
+ 'Страж — не враг. Страж —immune земли против тех, кто выкачивает. Я понял это слишком поздно.',
+ 'Дно не дно. Дно — дверь. За ней не богатство и не тьма. За ней — то, что осталось от нас.',
+ 'Последняя страница. Если я не вернусь — запечатай сердце рудника. Или забери всё. Глубины помнят и то, и другое.'];
+var TIPS=['Построй склад, пока шахта не переполнила лимит — руда сверх лимита пропадает.','Казарма — бесплатная сила: каждый уровень даёт отряду урон.','Серый лут сдавай Фекле — в фазу полной луны она платит 60%.','Глубокие земли — это зубы без ангельского терпения. Поехали со щитом.','Свиток лута ×2 ставь на бои, которые точно выиграешь — на Набеге, не на Штурме.','Ускорения копи на тяжёлые стройки — минутка ожидания не стоит ⚡.','Боссов бей после апгрейда казармы. Честно говорят: без снаряжения они тебя жуют.','Рюкзак полон? Сдавай хлам — редкий лут с превращением в руду обиден.','Кольца дают только урон. В глубоких землях ставь амулет — там нужен HP.','Постройка даёт опыт. Стройка дешёвая = опыт бесплатный.'];
+var HERO_STORY=[
+ {id:'intro',cond:function(){return true;},who:'ПИСЬМО ДЕДА',sub:'найдено под порогом шахты',txt:'«Внук. Шахта не истощилась. Она ушла вниз. Копай — и помни: глубины помнят тех, кто берёт лишнее. Я не успел. Ты успеешь. Построй сначала шахту — пусть рудник вспомнит запах работы». Текст обрывается, чернила смазаны. Кажется, рукой деда — но оттиснута в глубине, не на бумаге.'},
+ {id:'mine1',cond:function(){return S.buildingsBuilt>=1;},who:'ШАХТА',sub:'первый ярус',txt:'Кирка входит в камень легко, будто камень ждал. Вечером из свежего ствола пахнет солью и чем-то ещё — медью, влажной памятью. «Так и начиналось», — шепчешь ты и не замечаешь, что подражаешь деду.'},
+ {id:'win1',cond:function(){return S.wins>=1;},who:'КРЫСОЛЮД',sub:'на краю темноты',txt:'Он отползает и смотрит — не как зверь, а как сосед, у которого отняли дом. «Мы придём за тобой», — шепчет он в первый раз. Издалека ты не уверена… уверен, что слышал эту фразу раньше. В письме деда. Слово в слово.'},
+ {id:'f5',cond:function(){return S.floor>=5;},who:'РУДНИК ОТЦОВ',sub:'этаж 5',txt:'Ниже соляной корки — ровные камни, пробитые проходы, обвалившаяся вагонетка. Работы деда. Здесь ещё слышно небо — редкие осколки падают сквозь породу и звенят на ступенях. Люди Тени собирают их и зовут небесными.'},
+ {id:'f10',cond:function(){return S.floor>=10;},who:'ГОЛОСА',sub:'этаж 10',txt:'Стражи перестали молчать. Не в человеческих словах — в стуке по трубам, в ритме капели, в содрогании вагонеточных рельсов. Три удара — пауза — три удара. Так, как писал дед в дневнике. Они здороваются. Или прощаются.'},
+ {id:'f15',cond:function(){return S.floor>=15;},who:'РАНА',sub:'этаж 15',txt:'Воздух теплее крови. В камне — пульс. Руда, которую ты выкачиваешь, — не мёртвый груз, а сон чего-то большого. Пожиратели глубин — не враги, а стражи этого сна. Чтобы подняться выше, тебе придётся будить то, что просить будить не будет.'},
+ {id:'f25',cond:function(){return S.floor>=25;},who:'ЭХО',sub:'этаж 25',txt:'Стражи здесь носят лица магнатов прошлого — они смотрелись в руду и руда запомнила. Один из них похож на тебя. Не уточняешь, почему. Он говорит твоим голосом: «Возьми всё. Как брали до тебя. Как возьмут после».'},
+ {id:'f50',cond:function(){return S.floor>=50;},who:'ДНО',sub:'этаж 50',txt:'Дно. Дверь. За ней — то, что осталось от всех, кто дошёл. Дед писал: «Запечатай сердце — или забери всё». Глубины помнят и то, и другое. Выбор — твой. (Продолжение следует — финальный выбор в v9.)'}];
+function freshS(){return{ore:150,star:0,spd:3,floor:1,wins:0,buildings:{},buildingsBuilt:0,oreMult:1,autoMine:0,
  hero:{lvl:1,xp:0},eq:{weapon:null,armor:null,helm:null,amulet:null,ring:null,boots:null,pack:null},
  bag:[],uid:1,pot:1,scroll:0,abil:{},guideStep:1,lastSeen:Date.now(),raidCdUntil:0,
- shopCat:'weapon',heroTab:'person',bagF:'all',_sv:0};}
+ shopCat:'weapon',heroTab:'person',bagF:'all',storySeen:{},storyQueue:[],diary:[],bosses:{},_sv:0};}
 var S=freshS();
 function save(){try{S.lastSeen=Date.now();localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function load(){try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);var f=freshS();var k;for(k in f){if(o[k]!==undefined)f[k]=o[k];}S=f;}}catch(e){}}
@@ -261,9 +319,11 @@ function renderCity(){var c=$('city');if(!c)return;c.innerHTML='';var now=Date.n
    inner+='</div>';cell.innerHTML=inner;
   }else cell.innerHTML='<span class="plus">+</span>';
   c.appendChild(cell);}}
-function raidData(k){var R=DEEPS[k]||RAIDS[k];
+function raidData(k){if(k==='boss'){var B=bossOf(S.floor);
+  return{R:{n:B.n+' [БОСС]',cost:150,cd:8,ehp:B.ehp,eatk:B.eatk,rOre:B.rOre,rStar:B.rStar,xp:B.xp,en:B.n,ei:B.ei,w:[0,0,0,50,50]},key:k,ehp:B.ehp+(S.floor-1)*40,eatk:B.eatk+(S.floor-1)*3,deep:false,boss:true};}
+ var R=DEEPS[k]||RAIDS[k];
  return{R:R,key:k,ehp:R.ehp+(S.floor-1)*60,eatk:R.eatk+(S.floor-1)*5,
-  deep:!!DEEPS[k]};}
+  deep:!!DEEPS[k],boss:false};}
 function winChance(d){var avgD=heroAtk()*1.07;
  var avgE=d.eatk*1.07*100/(100+heroDef());
  var rk=d.ehp/Math.max(1,avgD);var rd=heroMaxHp()/Math.max(1,avgE);
@@ -288,6 +348,13 @@ function renderRaid(){var rb=$('raidBox');if(!rb)return;
  if(BT){renderBattle();return;}
  var busy=Date.now()<S.raidCdUntil;var mins=Math.ceil((S.raidCdUntil-Date.now())/60000);
  var h='<h2>⚔ Поход</h2>';
+ if(S.floor%5===0&&!S.bosses[S.floor]){var B=bossOf(S.floor);
+  h+='<div class="card" style="border-color:#8a3030;"><h3 style="color:#ff8a8a;">💀 БОСС ЭТАЖА '+S.floor+'</h3>';
+  h+='<div class="sub">'+B.n+'<br>⚔'+(B.eatk+(S.floor-1)*3)+' · ❤'+(B.ehp+(S.floor-1)*40)+'</div>';
+  h+='<div class="muted" style="font-style:italic;">'+B.q+'</div>';
+  h+='<div class="bar2"><i style="width:'+winChance(raidData('boss'))+'%"></i></div>';
+  h+='<div class="muted">Шанс ~'+winChance(raidData('boss'))+'% · Гарантированный эпический+ лут · '+Math.round(B.rOre*floorBonus())+' руды + '+Math.round(B.rStar*floorBonus())+'⭐</div>';
+  h+='<button class="btn red" data-act="raid" data-k="boss" data-cost="150"'+(busy?' disabled':'')+'>'+(busy?'Отряд в пути ('+mins+' мин)':'Вызвать босса! (−150 руды)')+'</button></div>';}
  h+='<div class="ghead">⚔ Подземелья</div>';
  var keys=['1','2','3'];var i;
  for(i=0;i<keys.length;i++){h+=raidCard(keys[i],busy,mins);}
@@ -317,14 +384,13 @@ function startRaid(k){if(BT)return;
  S.ore-=R.cost;renderStats();
  BT={k:k,d:d,ehp:d.ehp,ehpM:d.ehp,eatk:d.eatk,
   hhp:heroMaxHp(),hhpM:heroMaxHp(),
-  round:0,dDealt:0,dTaken:0,secondUsed:false,scrollUsed:false,log:[],timer:null};
- BT.log.unshift('<div class="ln q">'+R.en+': «'+ENEMY_Q[Math.floor(Math.random()*ENEMY_Q.length)]+'»</div>');
+  round:0,dDealt:0,dTaken:0,secondUsed:false,scrollUsed:false,log:[],timer:null,auto:false};
+ BT.log.unshift('<div class="ln q">'+R.en+': «'+(d.boss?bossOf(S.floor).q:ENEMY_Q[Math.floor(Math.random()*ENEMY_Q.length)])+'»</div>');
  BT.log.unshift('<div class="ln q">Герой: «'+HERO_Q[Math.floor(Math.random()*HERO_Q.length)]+'»</div>');
- renderRaid();
- BT.timer=setInterval(battleStep,1100);}
+ renderRaid();}
 function battleStep(){if(!BT)return;
  BT.round++;
- var dmg=BT.d.eatk>0?heroAtk()*(0.85+Math.random()*0.3):0;
+ var dmg=heroAtk()*(0.85+Math.random()*0.3);
  var crit=Math.random()<0.12;if(crit)dmg*=1.6;
  dmg=Math.round(dmg);BT.ehp-=dmg;BT.dDealt+=dmg;
  BT.log.unshift('<div class="ln h">⚔ Раунд '+BT.round+': герой бьёт на '+dmg+(crit?' (КРИТ!)':'')+' → '+BT.d.R.en+' '+Math.max(0,BT.ehp)+'/'+BT.ehpM+'</div>');
@@ -351,26 +417,40 @@ function renderBattle(){if(!BT)return;var rb=$('raidBox');
  var i;var max=BT.log.length<10?BT.log.length:10;
  for(i=0;i<max;i++)h+=BT.log[i];
  h+='</div><div class="bbtns">';
- h+='<button class="btn" data-act="potion"'+(S.pot<1?' disabled':'')+'>🧪 Зелье ('+S.pot+')</button>';
- h+='<button class="btn" data-act="scrollbtn"'+(S.scroll<1||BT.scrollUsed?' disabled':'')+'>📜 Свиток ×2</button>';
+ h+='<button class="btn" data-act="hit">⚔ Ударить</button>';
+ h+='<button class="btn" data-act="potion"'+(S.pot<1?' disabled':'')+'>🧪 ('+S.pot+')</button>';
+ h+='<button class="btn" data-act="scrollbtn"'+(S.scroll<1||BT.scrollUsed?' disabled':'')+'>📜 ('+S.scroll+')</button>';
  h+='</div>';
+ h+='<div class="bbtns"><button class="btn red" data-act="auto">'+(BT.auto?'⏸ Авто: ВКЛ':'▶ Авто-бой')+'</button></div>';
  rb.innerHTML=h;}
-function endBattle(win){if(!BT)return;clearInterval(BT.timer);
+function endBattle(win){if(!BT)return;if(BT.timer)clearInterval(BT.timer);
  var d=BT.d;var R=d.R;
  var o=0,st=0,xp=win?R.xp+Math.floor(S.floor*4):Math.floor((R.xp)/2);
- var loot=null,loot2=null,lootChance=0;
+ var loot=null,loot2=null;
  if(win){
   o=Math.round(R.rOre*floorBonus()*(S.abil.greed?1.15:1)*(BT.scrollUsed?2:1));
   st=Math.round(R.rStar*floorBonus());
   S.ore=Math.min(cap(),S.ore+o);S.star+=st;S.wins++;
   addXp(xp);
-  loot=giveLoot(lootItem(lootRoll(R.w)));
-  if(d.deep&&Math.random()<0.25)loot2=giveLoot(lootItem(lootRoll(R.w)));
-  if(!d.deep&&Math.random()<0.15)loot2=giveLoot(lootItem(lootRoll(R.w)));
+  var rar1=lootRoll(R.w);
+  if(d.boss)rar1=Math.max(4,rar1);
+  loot=giveLoot(lootItem(rar1));
+  if((d.deep||d.boss)&&Math.random()<0.25)loot2=giveLoot(lootItem(lootRoll(R.w)));
+  if(!d.deep&&!d.boss&&Math.random()<0.15)loot2=giveLoot(lootItem(lootRoll(R.w)));
   var nf=1+Math.floor(S.wins/5);
-  if(nf>S.floor){S.floor=nf;toast('🏆 Новый этаж! Доход ×'+floorBonus().toFixed(1));}
+  if(nf>S.floor){S.floor=nf;toast('🏆 Спуск! Этаж '+nf+' · Доход ×'+floorBonus().toFixed(1));}
   if(S.guideStep===4)S.guideStep=5;
- }else{
+  if(d.boss){S.bosses[S.floor]=true;toast('💀 Босс повержен: '+R.en);}
+  // дневник
+  var pageDrop=d.deep?0.2:(d.boss?1:0.08);
+  if(Math.random()<pageDrop){
+   var missing=[];var p;
+   for(p=0;p<DIARY.length;p++)if(S.diary.indexOf(p)<0)missing.push(p);
+   if(missing.length){var pick=missing[Math.floor(Math.random()*missing.length)];
+    S.diary.push(pick);S.diary.sort(function(a,b){return a-b;});
+    setTimeout(function(){toast('📜 Найдена страница дневника ('+S.diary.length+'/'+DIARY.length+')');},800);}}
+ }
+ else{
   var lost=Math.floor(S.ore*(d.deep?0.15:0.1));S.ore=Math.max(0,S.ore-lost);
  }
  S.raidCdUntil=Date.now()+R.cd*(S.abil.swift?0.7:1)*60000;
@@ -381,10 +461,9 @@ function endBattle(win){if(!BT)return;clearInterval(BT.timer);
  h+='<span class="chip">Раундов: '+BT.round+'</span>';
  h+='<span class="chip">⚔ Нанесено: '+BT.dDealt+'</span>';
  h+='<span class="chip">🩸 Получено: '+BT.dTaken+'</span>';
- h+='<span class="chip">❤ Потеряно: '+Math.min(BT.hhpM,BT.dTaken)+'</span>';
  h+='<span class="chip">Опыт: +'+xp+'</span>';
  if(win)h+='<span class="chip">⛏ +'+o+'</span><span class="chip">⭐ +'+st+'</span>';
- else h+='<span class="chip">Лечение: −'+Math.floor(S.ore*0.1+1)+' руды</span>';
+ else h+='<span class="chip">Лечение: −руды</span>';
  h+='</div>';
  if(win){
   if(loot)h+=lootCard(loot);
@@ -394,8 +473,8 @@ function endBattle(win){if(!BT)return;clearInterval(BT.timer);
   h+='<div class="muted">Совет: качайте казарму, экипировку и уровень героя. Глубокие земли без снаряжения — смерть.</div>';
  }
  h+='<button class="btn" data-act="close" style="margin-top:8px;">Продолжить</button>';
- ov.innerHTML=h;$('overlay').classList.add('show');
- BT=null;renderRaid();renderStats();save();}
+ ov.innerHTML=h;ov.classList.remove('story');$('overlay').classList.add('show');
+ BT=null;checkStory();renderRaid();renderStats();save();}
 function usePotion(){if(!BT||S.pot<1)return;S.pot--;
  var heal=Math.round(BT.hhpM*0.5);BT.hhp=Math.min(BT.hhpM,BT.hhp+heal);
  BT.log.unshift('<div class="ln s">🧪 Зелье: +'+heal+' HP</div>');renderBattle();save();}
@@ -411,14 +490,15 @@ function openBuild(cellId){var ov=$('ovbox');var h='<h3 style="color:var(--brz2)
   h+='<span>'+ICOB[t]+' '+NAMEB[t]+' <small style="color:var(--dim)">'+TIMEB[t]+' с</small></span>';
   h+='<span class="c">'+COSTB[t]+' руды</span></div>';}
  h+='<div class="opt dark" data-act="close">Отмена</div>';
- ov.innerHTML=h;$('overlay').classList.add('show');}
+ ov.innerHTML=h;ov.classList.remove('story');$('overlay').classList.add('show');}
 function doBuild(t,cellId){if(S.ore<COSTB[t]){toast('Мало руды');return;}
  S.ore-=COSTB[t];
  S.buildings[cellId]={t:t,lvl:1,until:Date.now()+TIMEB[t]*1000,newLvl:1};
+ S.buildingsBuilt++;
  if(S.guideStep===1&&t==='mine')S.guideStep=2;
  if(S.guideStep===2&&t==='storage')S.guideStep=3;
  if(S.guideStep===3&&t==='barracks')S.guideStep=4;
- closeOv();renderAll();save();addXp(5);toast('🏗 '+NAMEB[t]+': стройка '+TIMEB[t]+' с');}
+ closeOv();checkStory();renderAll();save();addXp(5);toast('🏗 '+NAMEB[t]+': стройка '+TIMEB[t]+' с');}
 function openUpg(cellId){var b=S.buildings[cellId];var ov=$('ovbox');
  var cost=COSTB[b.t]*b.lvl;var tm=TIMEB[b.t]*b.lvl;
  var h='<h3 style="color:var(--brz2);margin:0 0 4px;">'+NAMEB[b.t]+' · ур.'+b.lvl+'</h3>';
@@ -426,7 +506,7 @@ function openUpg(cellId){var b=S.buildings[cellId];var ov=$('ovbox');
  var ok=S.ore>=cost;
  h+='<div class="opt'+(ok?'':' no')+'" data-act="'+(ok?'upg':'noop')+'" data-cell="'+cellId+'"><span>▲ Улучшить до ур.'+(b.lvl+1)+'</span><span class="c">'+cost+' руды</span></div>';
  h+='<div class="opt dark" data-act="close">Отмена</div>';
- ov.innerHTML=h;$('overlay').classList.add('show');}
+ ov.innerHTML=h;ov.classList.remove('story');$('overlay').classList.add('show');}
 function doUpg(cellId){var b=S.buildings[cellId];var cost=COSTB[b.t]*b.lvl;
  if(S.ore<cost){toast('Мало руды ('+cost+')');return;}
  S.ore-=cost;b.newLvl=b.lvl+1;b.until=Date.now()+TIMEB[b.t]*b.lvl*1000;
@@ -437,7 +517,7 @@ function openSpeed(cellId){var b=S.buildings[cellId];var ov=$('ovbox');
  var ok=S.spd>=1;
  h+='<div class="opt'+(ok?'':' no')+'" data-act="'+(ok?'speedup':'noop')+'" data-cell="'+cellId+'"><span>⚡ Ускорить мгновенно</span><span class="c">1 ⚡ (есть '+S.spd+')</span></div>';
  h+='<div class="opt dark" data-act="close">Закрыть</div>';
- ov.innerHTML=h;$('overlay').classList.add('show');}
+ ov.innerHTML=h;ov.classList.remove('story');$('overlay').classList.add('show');}
 function doSpeed(cellId){var b=S.buildings[cellId];if(S.spd<1)return;
  S.spd--;b.until=0;delete b.newLvl;
  closeOv();renderAll();save();addXp(5);toast('⚡ Стройка завершена!');}
@@ -461,7 +541,7 @@ function openItem(u,src,slot){var ov=$('ovbox');var inst=null;
   h+='<div class="opt" data-act="sell" data-u="'+inst.u+'"><span>Продать</span><span class="c">+'+Math.floor(d.price*0.4)+' руды</span></div>';
  }
  h+='<div class="opt dark" data-act="close">Закрыть</div>';
- ov.innerHTML=h;$('overlay').classList.add('show');}
+ ov.innerHTML=h;ov.classList.remove('story');$('overlay').classList.add('show');}
 function doEquip(u){var i,idx=-1;for(i=0;i<S.bag.length;i++)if(S.bag[i].u==u)idx=i;
  if(idx<0)return;var inst=S.bag[idx];var d=ITEMS[inst.id];
  if(S.hero.lvl<d.lvl){toast('Нужен уровень '+d.lvl);return;}
@@ -481,6 +561,8 @@ function doSell(u){var i,idx=-1;for(i=0;i<S.bag.length;i++)if(S.bag[i].u==u)idx=
   closeOv();renderAll();save();toast('Продано: +'+g2+' руды');return;}}}
 function doDrop(u){var i;for(i=0;i<S.bag.length;i++)if(S.bag[i].u==u){S.bag.splice(i,1);break;}
  closeOv();renderAll();save();toast('Предмет выброшен');}
+function moonPhase(){var day=Math.floor(Date.now()/86400000);return day%4;}
+function fickleRate(){return [30,45,55,60][moonPhase()];}
 function renderHero(){var hb=$('heroBox');if(!hb)return;var tab=S.heroTab||'person';var h='';
  h+='<h2>🎒 Герой</h2>';
  h+='<div class="subtabs">';
@@ -493,14 +575,16 @@ function renderHero(){var hb=$('heroBox');if(!hb)return;var tab=S.heroTab||'pers
   h+='<div class="xpline"><i style="width:'+Math.min(100,100*S.hero.xp/xpNext())+'%"></i></div>';
   h+='<div class="muted" style="margin-top:2px;">Опыт: '+Math.floor(S.hero.xp)+' / '+xpNext()+'</div>';
   h+='<div class="stchips"><span class="chip">⚔ '+heroAtk()+'</span><span class="chip">🛡 '+heroDef()+'</span><span class="chip">❤ '+heroMaxHp()+'</span></div></div>';
+  h+='<div class="divider"><span>⚜ '+(S.heroTab==='person'?'СНАРЯЖЕНИЕ ГЕРОЯ':'')+'</span></div>';
   var slots=['weapon','armor','helm','amulet','ring','boots','pack'];h+='<div class="doll">';
   var i;for(i=0;i<slots.length;i++){var sl=slots[i];var it=S.eq[sl];
    if(it){var d=ITEMS[it.id];
-    h+='<div class="slot full" style="border-color:'+RAR[d.rar].c+';" data-act="item" data-src="eq" data-u="'+it.u+'" data-slot="'+sl+'"><span class="ic">'+SLOTI[sl]+'</span><span class="snq" style="color:'+RAR[d.rar].c+'">'+d.n.split(' ')[0]+'</span><span class="snm">'+SLOTN[sl]+'</span></div>';
+    h+='<div class="slot full" style="--rar:'+RAR[d.rar].c+';" data-act="item" data-src="eq" data-u="'+it.u+'" data-slot="'+sl+'"><span class="ic">'+SLOTI[sl]+'</span><span class="snq" style="color:'+RAR[d.rar].c+'">'+d.n.split(' ')[0]+'</span><span class="snm">'+SLOTN[sl]+'</span></div>';
    }else h+='<div class="slot" data-act="noslot"><span class="ic">'+SLOTI[sl]+'</span><span class="snm">'+SLOTN[sl]+'<br>пусто</span></div>';}
   h+='</div>';
   h+='<div class="muted">Тап по предмету — карточка с «Снять/Продать»</div>';
  }else if(tab==='bag'){
+  h+='<div class="divider"><span>⚜ РЮКЗАК</span></div>';
   h+='<div class="bagbar">';
   var fs=[['all','Все'],['weapon','⚔ Оружие'],['armor','🛡 Доспех'],['helm','⛑ Голова'],['boots','👢 Ноги'],['amulet','📿'],['ring','💍'],['pack','🎒']];
   for(i=0;i<fs.length;i++){var on=S.bagF===fs[i][0];
@@ -526,7 +610,7 @@ function renderHero(){var hb=$('heroBox');if(!hb)return;var tab=S.heroTab||'pers
  hb.innerHTML=h;}
 function renderShop(){var sb=$('shopBox');if(!sb)return;
  var cat=S.shopCat||'weapon';
- var cats=[['weapon','⚔ Оружие'],['helm','⛑ Голова'],['armor','🛡 Доспех'],['boots','👢 Ноги'],['amulet','📿 Амулеты'],['ring','💍 Кольца'],['pack','🎒 Рюкзаки'],['cons','🧪 Расходники'],['abil','✨ Способности'],['bm','🌑 Чёрный рынок']];
+ var cats=[['weapon','⚔ Оружие'],['helm','⛑ Голова'],['armor','🛡 Доспех'],['boots','👢 Ноги'],['amulet','📿 Амулеты'],['ring','💍 Кольца'],['pack','🎒 Рюкзаки'],['cons','🧪 Расходники'],['abil','✨ Способности'],['sell','💰 Продажа'],['bm','🌑 Чёрный рынок']];
  var h='<h2>🏪 Лавка</h2><div class="subtabs">';
  var i;for(i=0;i<cats.length;i++){var on=cat===cats[i][0];
   h+='<span class="subtab'+(on?' active':'')+'" data-act="shopcat" data-v="'+cats[i][0]+'">'+cats[i][1]+'</span>';}
@@ -544,6 +628,21 @@ function renderShop(){var sb=$('shopBox');if(!sb)return;
    h+='<span class="ic">✨</span><span class="mid"><span class="nm">'+ab.n+'</span><br><span class="st">'+ab.d+'</span></span>';
    h+='<span class="pr">'+(owned?'✔ изучено':(ab.price+' '+(ab.cur==='ore'?'руды':'⭐')))+'</span></div>';}
   h+='</div>';
+ }else if(cat==='sell'){
+  h+='<div class="muted" style="margin-bottom:8px;">Лавка скупает за 40%. Фекла на чёрном рынке платит по луне: сегодня '+fickleRate()+'%.</div>';
+  if(!S.bag.length){
+   h+='<div class="card"><div class="muted">Рюкзак пуст. Идите в поход — стражи носят приличное снаряжение.</div></div>';
+  }else{
+   h+='<div class="grid2">';
+   var i2,inst2,total=0;
+   for(i2=0;i2<S.bag.length;i2++){inst2=S.bag[i2];
+    var dd2=ITEMS[inst2.id];var gain2=Math.floor(dd2.price*0.4);total+=gain2;
+    h+='<div class="itm" style="border-color:'+RAR[dd2.rar].c+'" data-act="sell" data-u="'+inst2.u+'">';
+    h+='<span class="ic">'+SLOTI[dd2.slot]+'</span><span class="mid"><span class="nm" style="color:'+RAR[dd2.rar].c+'">'+dd2.n+'</span><br><span class="st">'+RAR[dd2.rar].n+'</span></span><span class="pr">+'+gain2+' руды</span></div>';}
+   h+='</div>';
+   h+='<div class="muted" style="margin-top:10px;">Всего в рюкзаке: '+total+' руды</div>';
+   h+='<div style="text-align:center;margin-top:8px;"><button class="btn red" data-act="selljunk">🗑 Сдать весь обычный лут</button></div>';
+  }
  }else if(cat==='bm'){
   h+='<div class="muted" style="margin-bottom:8px;">Дорогой курс за ⭐. Редкое снаряжение, которого нет в лавке.</div>';
   h+='<div class="grid2">';
@@ -556,10 +655,10 @@ function renderShop(){var sb=$('shopBox');if(!sb)return;
   h+='</div>';
   h+='<div class="muted">Звёзды добываются только в походах.</div>';
  }else{
-  var bySlot={};var k;
+  var bySlot=[];var k;
   for(k in ITEMS){var d=ITEMS[k];if(d.cur!=='ore')continue;if(d.slot!==cat)continue;
-   if(!bySlot[cat])bySlot[cat]=[];bySlot[cat].push(k);}
-  var keys=bySlot[cat]||[];keys.sort(function(a,b){return ITEMS[a].lvl-ITEMS[b].lvl;});
+   bySlot.push(k);}
+  var keys=bySlot;keys.sort(function(a,b){return ITEMS[a].lvl-ITEMS[b].lvl;});
   h+='<div class="grid2">';
   for(i=0;i<keys.length;i++){k=keys[i];d=ITEMS[k];
    var locked=S.hero.lvl<d.lvl;
@@ -583,13 +682,70 @@ function buyAb(k){var i;for(i=0;i<ABIL.length;i++){var ab=ABIL[i];if(ab.id!==k)c
  else{if(S.star<ab.price){toast('Мало звёзд');return;}S.star-=ab.price;}
  S.abil[k]=1;toast('✨ Способность изучена: '+ab.n);}
  renderAll();save();}
+function renderMore(){var mb=$('moreBox');if(!mb)return;
+ var day=Math.floor(Date.now()/86400000);var tip=TIPS[day%TIPS.length];
+ var h='<h2>⋮ Ещё</h2>';
+ h+='<div class="card"><h3>🦇 Фекла, крысолюд-торговка</h3>';
+ h+='<div class="sub">Обитательница рудника отцов. Спрашивать, откуда осколки, не советую.</div>';
+ h+='<div class="icard"><b style="color:var(--brz2)">Луна над рудником: '+['тёмная','растущая','полная','убывающая'][moonPhase()]+'</b>';
+ h+='<div class="muted">Сегодня Фекла скупает лут за '+fickleRate()+'% цены (лавка платит 40%).</div></div>';
+ h+='<div class="opt" data-act="fickleSell"><span>💸 Продать весь обычный лут Фекле ('+fickleRate()+'%)</span></div>';
+ h+='<div class="opt dark" style="font-style:italic;">«'+tip+'» — Фекла</div></div>';
+ h+='<div class="card"><h3>📜 Дневник деда</h3>';
+ h+='<div class="sub">Найдено страниц: '+S.diary.length+' из '+DIARY.length+'</div>';
+ if(!S.diary.length)h+='<div class="muted">Страницы падают с побед в походах. Глубокие земли щедрее.</div>';
+ else{var i;
+  h+='<div class="grid2" style="max-width:460px;">';
+  for(i=0;i<S.diary.length;i++){var pi=S.diary[i];
+   h+='<div class="itm" data-act="diaryPage" data-p="'+pi+'"><span class="ic">📜</span><span class="mid"><span class="nm">Страница '+(pi+1)+'</span><br><span class="st">'+DIARY[pi].slice(0,28)+'…</span></span></div>';}
+  h+='</div>';}
+ h+='</div>';
+ h+='<div class="card">';
+ h+='<p class="sub">Версия v8 «Магнат глубин». Код приглашения: <b id="refc">—</b></p>';
+ h+='<button class="btn" data-act="share">📤 Поделиться городом</button>';
+ h+='<p style="margin:14px 0 2px;"><button class="btn red" data-act="reset">🗑 Сброс прогресса</button></p>';
+ h+='</div>';
+ mb.innerHTML=h;}
+function showDiaryPage(pi){var ov=$('ovbox');
+ var h='<div class="story"><div class="who">СТРАНИЦА '+(pi+1)+' · ДНЕВНИК ДЕДА<small>Мёртвый лес, рудник</small></div>';
+ h+='<div class="hr"></div>';
+ h+='<div class="txt" style="font-style:normal;">'+DIARY[pi]+'</div>';
+ h+='<div class="opt dark" data-act="close">Закрыть</div></div>';
+ ov.innerHTML=h;ov.classList.add('story');$('overlay').classList.add('show');}
+function checkStory(){var i;
+ for(i=0;i<HERO_STORY.length;i++){var st=HERO_STORY[i];
+  if(!S.storySeen[st.id]&&S.storyQueue.indexOf(st.id)<0){
+   var ok=false;
+   try{ok=st.cond();}catch(e){ok=false;}
+   if(ok)S.storyQueue.push(st.id);}}
+ if(S.storyQueue.length&&!BT)showNextStory();}
+function showNextStory(){if(!S.storyQueue.length)return;
+ var id=S.storyQueue.shift();S.storySeen[id]=1;
+ var st=null;var i;
+ for(i=0;i<HERO_STORY.length;i++)if(HERO_STORY[i].id===id)st=HERO_STORY[i];
+ if(!st){showNextStory();return;}
+ var ov=$('ovbox');
+ var h='<div class="who">'+st.who+'<small>'+st.sub+'</small></div>';
+ h+='<div class="hr"></div>';
+ h+='<div class="txt">'+st.txt+'</div>';
+ h+='<div class="opt dark" data-act="storynext">Дальше ▶</div>';
+ ov.innerHTML=h;ov.classList.add('story');$('overlay').classList.add('show');save();}
+function fickleSell(){var day=Math.floor(Date.now()/86400000);
+ var rate=fickleRate();var sold=0,sum=0,i;
+ for(i=S.bag.length-1;i>=0;i--){var it3=ITEMS[S.bag[i].id];
+  if(it3.rar<=2){sum+=Math.floor(it3.price*rate/100);S.bag.splice(i,1);sold++;}}
+ if(!sold){toast('Фекла: «Обычного лута нет. Не лезь с редким — небо падает на твои вещи»');return;}
+ S.ore=Math.min(cap(),S.ore+sum);
+ toast('Фекла скупила '+sold+' предметов: +'+sum+' руды');
+ renderAll();save();}
 function renderAll(){
  try{renderStats();}catch(e){showErr(e.message);}
  try{renderGuide();}catch(e){showErr(e.message);}
  try{renderCity();}catch(e){showErr(e.message);}
  try{renderRaid();}catch(e){showErr(e.message);}
  try{renderHero();}catch(e){showErr(e.message);}
- try{renderShop();}catch(e){showErr(e.message);}}
+ try{renderShop();}catch(e){showErr(e.message);}
+ try{renderMore();}catch(e){showErr(e.message);}}
 function switchTab(v){
  var tabs=document.querySelectorAll('.tab');var i;
  for(i=0;i<tabs.length;i++)tabs[i].classList.toggle('active',tabs[i].dataset.v===v);
@@ -597,7 +753,7 @@ function switchTab(v){
  for(i=0;i<views.length;i++)views[i].classList.remove('active');
  var sec=$('v_'+v);if(!sec){showErr('Нет секции: '+v);return;}
  sec.classList.add('active');
- try{if(v==='raid')renderRaid();if(v==='hero')renderHero();if(v==='shop')renderShop();}catch(e){showErr(e.message);}}
+ try{if(v==='raid')renderRaid();if(v==='hero')renderHero();if(v==='shop')renderShop();if(v==='more')renderMore();}catch(e){showErr(e.message);}}
 document.addEventListener('click',function(e){
  var el=e.target.closest('[data-act]');if(!el)return;
  var act=el.dataset.act;
@@ -613,6 +769,11 @@ document.addEventListener('click',function(e){
  else if(act==='upg')doUpg(el.dataset.cell);
  else if(act==='speedup')doSpeed(el.dataset.cell);
  else if(act==='raid')startRaid(el.dataset.k);
+ else if(act==='hit')battleStep();
+ else if(act==='auto'){
+  if(BT.timer){clearInterval(BT.timer);BT.timer=null;BT.auto=false;}
+  else{BT.auto=true;BT.timer=setInterval(battleStep,1100);}
+  renderBattle();}
  else if(act==='potion')usePotion();
  else if(act==='scrollbtn')useScroll();
  else if(act==='buy')buyItem(el.dataset.k);
@@ -625,15 +786,25 @@ document.addEventListener('click',function(e){
  else if(act==='unequip')doUnequip(el.dataset.slot);
  else if(act==='sell')doSell(el.dataset.u);
  else if(act==='drop')doDrop(el.dataset.u);
+ else if(act==='selljunk'){var sold=0,sum=0,i;
+  for(i=S.bag.length-1;i>=0;i--){var it3=ITEMS[S.bag[i].id];
+   if(it3.rar<=2){sum+=Math.floor(it3.price*0.4);S.bag.splice(i,1);sold++;}}
+  if(!sold){toast('Обычного лута нет — продавать редкое не дам');}
+  else{S.ore=Math.min(cap(),S.ore+sum);
+   toast('Сдано '+sold+' предметов: +'+sum+' руды');
+   renderAll();save();}}
+ else if(act==='fickleSell')fickleSell();
+ else if(act==='diaryPage')showDiaryPage(+el.dataset.p);
+ else if(act==='storynext'){if(S.storyQueue.length)showNextStory();else closeOv();}
  else if(act==='filter'){S.bagF=el.dataset.f;renderHero();}
  else if(act==='noslot')toast('Слот пуст — наденьте предмет из рюкзака');
  else if(act==='close')closeOv();
  else if(act==='noop')toast('Недоступно: не хватает ресурсов или уровня');
- else if(act==='share'){var txt='Мой подземный город — этаж '+S.floor+'! Герой ур.'+S.hero.lvl+'. Залетай: t.me/your_bot?start=ref01';
+ else if(act==='share'){var txt='Мой подземный рудник — этаж '+S.floor+'! Герой ур.'+S.hero.lvl+'. Залетай: t.me/your_bot?start=ref01';
   if(navigator.share)navigator.share({text:txt}).catch(function(){});
   else{if(navigator.clipboard)navigator.clipboard.writeText(txt);toast('Ссылка скопирована');}}
  else if(act==='reset'){if(confirm('Сбросить весь прогресс?')){
-  localStorage.removeItem(KEY);S=freshS();renderAll();save();}}
+  localStorage.removeItem(KEY);S=freshS();renderAll();save();checkStory();}}
 });
 function closeOv(){$('overlay').classList.remove('show');}
 function tick(){var now=Date.now();
@@ -674,6 +845,7 @@ function welcome(){var gone=(Date.now()-S.lastSeen)/3600000;
  S.lastSeen=Date.now();}
 load();welcome();renderAll();
 $('refc').textContent='ref'+(1000+Math.floor(Math.random()*9000));
+checkStory();
 setInterval(tick,250);
 setInterval(function(){S.lastSeen=Date.now();save();},60000);
 </script>
