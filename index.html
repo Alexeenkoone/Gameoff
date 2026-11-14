@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0e0b08">
-<title>Магнат глубин v9.12</title>
+<title>DARK DUNGEON — Магнат глубин</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root{--bg:#0e0b08;--panel:#1c1610;--panel2:#261d12;--brz:#c9a35c;--brz2:#e6c885;--tx:#e8ddc8;--dim:#8f8270;--bd:#3a2f1e;--dgr:#ff5252;--grn:#7ed957;}
@@ -25,14 +25,14 @@ h2{color:var(--brz2);text-align:center;margin:4px 0 10px;font-size:19px;text-sha
 .scene{max-width:560px;margin:0 auto;border:2px solid #4a3a20;border-radius:16px;background:radial-gradient(ellipse at 50% 0%,#221a10 0%,#120d07 70%);padding:10px 12px 12px;box-shadow:0 0 24px rgba(0,0,0,.6),inset 0 0 40px rgba(0,0,0,.5);}
 .scene-title{text-align:center;color:var(--brz2);font-weight:700;margin-bottom:8px;font-size:14px;}
 #city{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
-.cell{position:relative;aspect-ratio:1;background:#171208;border:2px dashed #3d2f18;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.cell.filled{border-style:solid;border-color:#4d3c1e;background:#1d1509;}
-.cell .plus{color:#4d3f26;font-size:20px;font-weight:700;}
+.cell{position:relative;aspect-ratio:1;background:linear-gradient(180deg,#1d1509,#120c05);border:2px dashed #3d2f18;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 12px rgba(0,0,0,.6);}
+.cell.filled{border-style:solid;border-color:#5a4726;background:linear-gradient(180deg,#261b0e,#150f06);box-shadow:inset 0 1px 0 rgba(201,163,92,.14),0 4px 10px rgba(0,0,0,.5);}
+.cell .plus{color:#5a4726;font-size:26px;font-weight:700;text-shadow:0 0 8px rgba(201,163,92,.35);}
 .bld{position:absolute;inset:3px;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:10px;text-align:center;padding:2px;}
-.bld .ico{font-size:20px;}
-.bld .lvl{position:absolute;top:2px;right:4px;font-size:9px;background:#000;border:1px solid var(--bd);border-radius:5px;padding:0 4px;color:var(--brz2);}
+.bld .ico{font-size:30px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.65));}
+.bld .lvl{position:absolute;top:3px;right:3px;font-size:9px;font-weight:700;background:linear-gradient(180deg,#c9a35c,#9c7b3c);color:#1a1206;border:1px solid #e6c987;border-radius:8px;padding:1px 5px;box-shadow:0 1px 3px rgba(0,0,0,.6);}
 .bld .pbar{position:absolute;bottom:4px;left:4px;right:4px;height:4px;background:#000;border-radius:2px;overflow:hidden;}
-.bld .pbar>i{display:block;height:100%;background:var(--brz);}
+.bld .pbar>i{display:block;height:100%;background:linear-gradient(90deg,#8a6b2f,#e2c267);}
 .bld.cityhall{background:linear-gradient(180deg,#4a3a20,#2a1d10);border:1px solid var(--brz);box-shadow:0 0 10px rgba(201,163,92,0.4);}
 .bld.mine{background:linear-gradient(180deg,#243018,#171a0d);border:1px solid #4d5c2a;}
 .bld.storage{background:linear-gradient(180deg,#332a12,#1d1708);border:1px solid #6a5628;}
@@ -98,24 +98,48 @@ h2{color:var(--brz2);text-align:center;margin:4px 0 10px;font-size:19px;text-sha
 .stat-btn{background:linear-gradient(180deg,#c9a35c,#9c7b3c);border:none;color:#1a1206;font-weight:bold;font-size:16px;width:24px;height:24px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,.5);}
 .stat-btn:active{transform:scale(0.9);}
 
-/* Бой */
-.bscene{display:flex;align-items:flex-start;justify-content:center;gap:10px;max-width:460px;margin:10px auto;}
+/* Бой — сцена подземелья */
+.bscene{position:relative;display:flex;align-items:flex-end;justify-content:center;gap:10px;max-width:460px;margin:10px auto;padding:58px 14px 26px;border-radius:16px;overflow:hidden;background:radial-gradient(ellipse at 18% 24%,rgba(255,170,60,.13),transparent 55%),radial-gradient(ellipse at 82% 24%,rgba(255,170,60,.13),transparent 55%),linear-gradient(180deg,#2a1d10 0%,#1b1209 55%,#0e0906 100%);border:1px solid #4a3618;box-shadow:inset 0 0 46px rgba(0,0,0,.75),inset 0 -14px 18px rgba(0,0,0,.55);}
+.bscene::before{content:'';position:absolute;left:0;right:0;bottom:0;height:24px;background:linear-gradient(180deg,rgba(120,88,40,.38),rgba(16,10,4,.92));border-top:1px solid rgba(201,163,92,.28);z-index:1;}
+.bscene::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,rgba(0,0,0,.18) 0 2px,transparent 2px 27px);opacity:.4;mix-blend-mode:multiply;z-index:0;}
+.btorch{position:absolute;top:15px;width:22px;height:42px;border-radius:5px 5px 7px 7px;background:linear-gradient(180deg,#ffd27a,#ff9c3a 30%,#c2571b 65%,#2a1506);box-shadow:0 0 22px 8px rgba(255,150,50,.38),inset 0 0 6px rgba(255,230,150,.9);animation:torchF 1.7s infinite alternate ease-in-out;z-index:2;}
+.btorch.tl{left:14px;}.btorch.tr{right:14px;animation-delay:.8s;}
+@keyframes torchF{0%{opacity:.8;transform:scaleY(1)}45%{opacity:1;transform:scaleY(1.1) skewX(-2deg)}100%{opacity:.88;transform:scaleY(.95) skewX(2deg)}}
+.bscene .frame{position:relative;z-index:3;}
+.bscene .pport{width:74px;height:74px;font-size:40px;}
+.bscene .pport>i{animation:ddBr2 2.6s ease-in-out infinite;}
+@keyframes ddBr2{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.06)}}
 .frame{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
-.pport{width:58px;height:58px;border-radius:50%;border:3px solid var(--brz);background:#241c13;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 14px rgba(201,163,92,.35);}
+.pport{width:58px;height:58px;border-radius:50%;border:3px solid var(--brz);background:radial-gradient(circle at 50% 30%,#3a2c1a,#241c13);display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 14px rgba(201,163,92,.35);}
 .frame.ev .pport{border-color:#8a4040;box-shadow:0 0 14px rgba(200,60,60,.3);}
 .frame .nm{font-size:12px;color:var(--brz2);font-weight:600;}
-.hpbar{width:100%;height:11px;background:#0d0a06;border:1px solid var(--bd);border-radius:6px;overflow:hidden;}
-.hpbar>i{display:block;height:100%;transition:width .4s;}
-.hpbar.h>i{background:linear-gradient(90deg,#3c8b4a,#6cc27a);}
-.hpbar.e>i{background:linear-gradient(90deg,#8b3c3c,#c26a6a);}
+.hpbar{position:relative;width:100%;height:14px;background:#0d0a06;border:1px solid #5a4726;border-radius:7px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.8);}
+.hpbar::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 19%,rgba(0,0,0,.5) 19% 20%);pointer-events:none;z-index:2;}
+.hpbar>i{display:block;height:100%;transition:width .4s;position:relative;}
+.hpbar>i::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);animation:hpShine 2.4s linear infinite;}
+@keyframes hpShine{0%{transform:translateX(-100%)}100%{transform:translateX(120%)}}
+.hpbar.h>i{background:linear-gradient(180deg,#7ed957,#2f7a3f 70%,#1d5a2c);}
+.hpbar.e>i{background:linear-gradient(180deg,#e06a6a,#8b3c3c 70%,#5c2222);}
+.hpbar.low>i{animation:hpPulse .7s ease-in-out infinite;}
+@keyframes hpPulse{0%,100%{box-shadow:0 0 4px rgba(220,60,60,.35)}50%{box-shadow:0 0 14px rgba(220,60,60,.95)}}
 .hpnum{font-size:11px;color:var(--dim);}
-.vs{align-self:center;color:var(--brz);font-weight:800;font-size:18px;}
+.vs{align-self:center;color:var(--brz);font-weight:800;font-size:18px;text-shadow:0 0 12px rgba(201,163,92,.7);position:relative;z-index:3;}
 .log{max-width:460px;margin:10px auto;height:150px;overflow-y:auto;background:#120e09;border:1px solid var(--bd);border-radius:10px;padding:8px;font-size:12.5px;line-height:1.55;}
 .ln{margin:1px 0;}
 .ln.h{color:#9fd08f;}.ln.e{color:#e09393;}.ln.s{color:var(--brz2);}.ln.c{color:#ffd34d;}
 .ln.q{color:#c9b8a0;font-style:italic;}
+.pop{position:absolute;top:24%;font-weight:800;font-size:16px;color:#ff6b6b;text-shadow:0 2px 6px #000,0 0 8px rgba(0,0,0,.8);animation:popUp .95s ease-out forwards;pointer-events:none;z-index:6;}
+.pop.crit{font-size:22px;color:#ffd34d;text-shadow:0 0 12px rgba(255,180,60,.9),0 2px 6px #000;}
+.pop.heal{color:#7ed957;}
+.pop.xp{color:#9fd08f;font-size:13px;}
+@keyframes popUp{0%{opacity:0;transform:translateY(8px) scale(.6)}18%{opacity:1;transform:translateY(0) scale(1.18)}100%{opacity:0;transform:translateY(-40px) scale(1)}}
+.bscene.shake{animation:bsShake .32s ease-in-out;}
+@keyframes bsShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}55%{transform:translateX(5px)}80%{transform:translateX(-2px)}}
 .bbtns{display:flex;gap:8px;justify-content:center;margin-top:10px;}
-
+#lvlFx{position:fixed;inset:0;z-index:900;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+#lvlFx .ltxt{font-size:22px;font-weight:800;color:#ffd34d;text-shadow:0 0 18px rgba(255,180,60,.85),0 2px 6px #000;display:flex;align-items:center;gap:8px;animation:lvlIn 1.7s ease-out forwards;}
+#lvlFx .ddi{font-size:30px;}
+@keyframes lvlIn{0%{opacity:0;transform:scale(.55)}20%{opacity:1;transform:scale(1.12)}75%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.25)}}
 /* Тосты */
 #toasts{position:fixed;bottom:calc(92px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;width:max-content;max-width:92vw;}
 .toast{background:rgba(12,9,5,.95);color:var(--brz2);border:1px solid var(--bd);padding:7px 16px;border-radius:18px;font-size:13.5px;font-weight:600;animation:tin .2s,tout .3s 2.3s forwards;}
@@ -289,11 +313,11 @@ main::after{content:'ᛝ · ᛟ · ᛝ';display:block;text-align:center;color:rg
     <span class="chip">Ур. <b id="s_lvl">1</b></span>
   </div>
   <nav>
-    <div class="tab active" role="button" tabindex="0" aria-current="true" data-act="tab" data-v="city"><i class=ddi data-s=city></i> Город</div>
-    <div class="tab" role="button" tabindex="0" data-act="tab" data-v="raid"><i class=ddi data-s=sword></i> Поход</div>
-    <div class="tab" role="button" tabindex="0" data-act="tab" data-v="hero"><i class=ddi data-s=bag></i> Герой</div>
-    <div class="tab" role="button" tabindex="0" data-act="tab" data-v="shop"><i class=ddi data-s=shop></i> Лавка</div>
-    <div class="tab" role="button" tabindex="0" data-act="tab" data-v="more"><i class=ddi data-s=quest></i> Задания</div>
+    <div role="button" tabindex="0" class="tab active" data-act="tab" data-v="city"><i class=ddi data-s=city></i> Город</div>
+    <div role="button" tabindex="0" class="tab" data-act="tab" data-v="raid"><i class=ddi data-s=sword></i> Поход</div>
+    <div role="button" tabindex="0" class="tab" data-act="tab" data-v="hero"><i class=ddi data-s=bag></i> Герой</div>
+    <div role="button" tabindex="0" class="tab" data-act="tab" data-v="shop"><i class=ddi data-s=shop></i> Лавка</div>
+    <div role="button" tabindex="0" class="tab" data-act="tab" data-v="more"><i class=ddi data-s=quest></i> Задания</div>
   </nav>
 </header>
 <main>
@@ -309,7 +333,7 @@ main::after{content:'ᛝ · ᛟ · ᛝ';display:block;text-align:center;color:rg
       </div>
       <div id="city"></div>
       <div id="city_army_info"></div>
-      <div class="scene-info" style="margin-top:8px;">Добыча: <span id="sc_rate">0</span>/с · Лимит: <span id="sc_cap">500</span> · Мощь: <i class=ddi data-s=sword></i><span id="sc_pow">12</span></div>
+      <div class="scene-info" style="margin-top:8px;">Добыча: <span id="sc_rate">0</span>/с · Лимит: <span id="sc_cap">0</span> · Мощь: <i class=ddi data-s=sword></i><span id="sc_pow">0</span></div>
     </div>
   </section>
   <section class="view" id="v_raid"><div id="raidBox"></div></section>
@@ -318,7 +342,7 @@ main::after{content:'ᛝ · ᛟ · ᛝ';display:block;text-align:center;color:rg
   <section class="view" id="v_more"><div id="moreBox"></div></section>
 </main>
 <div id="toasts"></div>
-<div id="overlay"><div id="ovbox"></div></div>
+<div id="overlay" role="dialog" aria-modal="true"><div id="ovbox"></div></div>
 <div id="err"></div>
 
 <script>
@@ -331,14 +355,13 @@ var CONFIG = {
   heroHpBase: 60, heroHpPerLvl: 8, heroPowerPerBarracks: 6,
   tickMs: 1000, oreGotBatchMs: 5000, saveEveryMs: 20000,
   raidCdSwiftMult: 0.7, fickleBaseRate: 40, fickleMoonRate: [30,45,55,60],
-  telegramBot: '' // впиши имя бота из @BotFather (без @); пусто = «Поделиться» покажет честный тост
+  telegramBot: '' // впиши имя бота после привязки Mini App в @BotFather
 };
 
 var KEY='magnat_v97';
 function migrate(o){o._v=o._v||1;if(o._v<2){o._v=2;}return o;}
-function saveCloud(){if(!tg||!tg.CloudStorage||!tg.CloudStorage.setItem)return;try{tg.CloudStorage.setItem('magnat_save',JSON.stringify(S));}catch(e){}}
 var _lastCloud=0;
-function saveMaybeCloud(){var n=Date.now();if(n-_lastCloud>150000){_lastCloud=n;saveCloud();}}
+function saveCloud(){if(!tg||!tg.CloudStorage)return;try{tg.CloudStorage.setItem('magnat_save',JSON.stringify(S));}catch(e){}}
 var RAR={1:{n:'Обычный',c:'#9a9a9a'},2:{n:'Необычный',c:'#7ed957'},3:{n:'Редкий',c:'#4aa3ff'},4:{n:'Эпический',c:'#b56cff'},5:{n:'Легендарный',c:'#ff4d4d'}};
 var SLOTN={weapon:'Оружие',armor:'Доспех',helm:'Шлем',amulet:'Амулет',ring:'Кольцо',boots:'Сапоги',pack:'Рюкзак'};
 var SLOTI={weapon:'<i class=ddi data-s=blade></i>',armor:'<i class=ddi data-s=armor></i>',helm:'<i class=ddi data-s=helm></i>',amulet:'<i class=ddi data-s=amulet></i>',ring:'<i class=ddi data-s=ring></i>',boots:'<i class=ddi data-s=boots></i>',pack:'<i class=ddi data-s=bag></i>'};
@@ -484,11 +507,11 @@ function freshS(){
 }
 
 var S=freshS();
-function save(){try{S.lastSeen=Date.now();localStorage.setItem(KEY,JSON.stringify(S));saveMaybeCloud();}catch(e){if(e&&e.name==='QuotaExceededError')toast('⚠ Не удалось сохранить — места нет');}}
+function save(){try{S.lastSeen=Date.now();localStorage.setItem(KEY,JSON.stringify(S));var _n=Date.now();if(_n-_lastCloud>150000){_lastCloud=_n;saveCloud();}}catch(e){if(e&&e.name==='QuotaExceededError')toast('⚠ Не удалось сохранить — места нет');}}
 function load(){
  try{
   var r=localStorage.getItem(KEY);
-  if(r){var o=JSON.parse(r);var f=freshS();var k;for(k in f){if(o[k]!==undefined)f[k]=o[k];}S=f;S=migrate(S);
+  if(r){var o=JSON.parse(r);var f=freshS();var k;for(k in f){if(o[k]!==undefined)f[k]=o[k];}S=migrate(f);
    if(!S.hero.str){S.hero.str=1;S.hero.int=1;S.hero.end=1;S.hero.pts=0;}
    if(!S.army) S.army=0;
    if(!S.armyMax) S.armyMax=10;
@@ -519,7 +542,7 @@ function addXp(n){
  S.hero.xp+=n;var up=false;
  while(S.hero.lvl<CONFIG.xpMaxLevel&&S.hero.xp>=xpNext()){
   S.hero.xp-=xpNext();S.hero.lvl++;S.hero.pts=(S.hero.pts||0)+3;up=true;
-  toast('<i class=ddi data-s=spark></i> Уровень '+S.hero.lvl+'! +3 очка статов');
+  toast('<i class=ddi data-s=spark></i> Уровень '+S.hero.lvl+'! +3 очка статов');lvlFx(S.hero.lvl);
  }
  if(up)renderShop();
 }
@@ -545,8 +568,8 @@ function hideOverlay(){$('overlay').classList.remove('show');tgBackState();}
 function closeOv(){hideOverlay();}
 
 /* РЕНДЕРЫ */
-function fmt(n){return Math.floor(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'\u2009');}
-function renderStats(){$('s_ore').textContent=fmt(S.ore);$('s_cap').textContent=cap();$('s_star').textContent=S.star;$('s_spd').textContent=S.spd;$('s_fl').textContent=S.floor;$('s_lvl').textContent=S.hero.lvl;$('sc_fl').textContent=S.floor;$('sc_rate').textContent=oreRate().toFixed(1);$('sc_cap').textContent=cap();$('sc_pow').textContent=heroAtk();}
+function fmt(n){n=Math.floor(n);var s=String(n);return s.replace(/\B(?=(\d{3})+(?!\d))/g,'\u2009');}
+function renderStats(){$('s_ore').textContent=fmt(S.ore);$('s_cap').textContent=fmt(cap());$('s_star').textContent=S.star;$('s_spd').textContent=S.spd;$('s_fl').textContent=S.floor;$('s_lvl').textContent=S.hero.lvl;$('sc_fl').textContent=S.floor;$('sc_rate').textContent=oreRate().toFixed(1);$('sc_cap').textContent=fmt(cap());$('sc_pow').textContent=fmt(heroAtk());}
 
 function renderGuide(){
  var g=$('guide');var hasHall=false,hasMine=false,hasStorage=false,hasBarracks=false;
@@ -666,27 +689,33 @@ function startRaid(k, isExp){
 function battleStep(){
  if(!BT)return;BT.round++;
  var dmg=heroAtk()*(0.85+Math.random()*0.3);var critChance = 0.12 + (S.hero.int * 0.01);var crit=Math.random()<critChance;
- if(crit)dmg*=1.6;dmg=Math.round(dmg);BT.ehp-=dmg;BT.dDealt+=dmg;
+ if(crit)dmg*=1.6;dmg=Math.round(dmg);BT.ehp-=dmg;BT.dDealt+=dmg;BT.fxH={d:dmg,crit:crit};
  if(crit)tgHaptic('heavy');else tgHaptic('light');
  BT.log.unshift('<div class="ln h"><i class=ddi data-s=sword></i> Раунд '+BT.round+': герой бьёт на '+dmg+(crit?' (КРИТ!)':'')+' → '+BT.d.R.en+' '+Math.max(0,BT.ehp)+'/'+BT.ehpM+'</div>');
  if(Math.random()<0.3)BT.log.unshift('<div class="ln q">Герой: «'+(BT.hq=pickQ(HERO_Q,BT.hq))+'»</div>');
  if(BT.ehp<=0){endBattle(true);return;}
- var edmg=BT.eatk*(0.85+Math.random()*0.3)*100/(100+heroDef());edmg=Math.round(edmg);BT.hhp-=edmg;BT.dTaken+=edmg;
+ var edmg=BT.eatk*(0.85+Math.random()*0.3)*100/(100+heroDef());edmg=Math.round(edmg);BT.hhp-=edmg;BT.dTaken+=edmg;BT.fxE=edmg;
  BT.log.unshift('<div class="ln e"><i class=ddi data-s=blood></i> '+BT.d.R.en+' бьёт на '+edmg+' → герой '+Math.max(0,BT.hhp)+'/'+BT.hhpM+'</div>');
  if(Math.random()<0.25)BT.log.unshift('<div class="ln q">'+BT.d.R.en+': «'+(BT.eq=pickQ(BT.d.R.q,BT.eq))+'»</div>');
  if(BT.hhp<=0){
   if(S.abil.second&&!BT.secondUsed){BT.secondUsed=true;BT.hhp=Math.round(BT.hhpM*0.3);BT.log.unshift('<div class="ln s"><i class=ddi data-s=spark></i> ВТОРОЕ ДЫХАНИЕ! Герой встаёт с '+BT.hhp+' HP</div>');}
   else{endBattle(false);return;}
  }
- renderBattle();
+ renderBattle();bfPop();
 }
+function bfPop(){if(!BT)return;var sc=document.querySelector('.bscene');if(!sc){BT.fxH=null;BT.fxE=null;return;}
+ if(BT.fxH){mkPop(sc,'pop'+(BT.fxH.crit?' crit':''),'−'+BT.fxH.d,20,58);if(BT.fxH.crit){sc.classList.add('shake');setTimeout(function(){sc.classList.remove('shake')},340);}}
+ if(BT.fxE)mkPop(sc,'pop','−'+BT.fxE,64,58);
+ BT.fxH=null;BT.fxE=null;}
+function mkPop(sc,cls,txt,lp,tp){var s=document.createElement('span');s.className=cls;s.textContent=txt;s.style.left='calc('+lp+'% - 8px)';s.style.top=tp+'%';sc.appendChild(s);setTimeout(function(){if(s.parentNode)s.parentNode.removeChild(s)},980);}
+function flashFx(cls,txt){var sc=document.querySelector('.bscene');if(sc)mkPop(sc,'pop '+cls,txt,24,26);}
 
 function renderBattle(){
  if(!BT)return;var rb=$('raidBox');
- var h='<h2><i class=ddi data-s=sword></i> Бой · раунд '+BT.round+'</h2><div class="bscene">';
- h+='<div class="frame"><div class="pport"><i class=ddi data-s=hero></i></div><div class="nm">Герой ур.'+S.hero.lvl+'</div><div class="hpbar h"><i style="width:'+Math.max(0,100*BT.hhp/BT.hhpM)+'%"></i></div><div class="hpnum">'+Math.max(0,BT.hhp)+'/'+BT.hhpM+'</div></div>';
+ var h='<h2><i class=ddi data-s=sword></i> Бой · раунд '+BT.round+'</h2><div class="bscene"><div class="btorch tl"></div><div class="btorch tr"></div>';
+ h+='<div class="frame"><div class="pport"><i class=ddi data-s=hero></i></div><div class="nm">Герой ур.'+S.hero.lvl+'</div><div class="hpbar h'+(BT.hhp/BT.hhpM<0.3?' low':'')+'"><i style="width:'+Math.max(0,100*BT.hhp/BT.hhpM)+'%"></i></div><div class="hpnum">'+Math.max(0,BT.hhp)+'/'+BT.hhpM+'</div></div>';
  h+='<div class="vs">VS</div>';
- h+='<div class="frame ev"><div class="pport">'+BT.d.R.ei+'</div><div class="nm">'+BT.d.R.en+'</div><div class="hpbar e"><i style="width:'+Math.max(0,100*BT.ehp/BT.ehpM)+'%"></i></div><div class="hpnum">'+Math.max(0,BT.ehp)+'/'+BT.ehpM+'</div></div></div>';
+ h+='<div class="frame ev"><div class="pport">'+BT.d.R.ei+'</div><div class="nm">'+BT.d.R.en+'</div><div class="hpbar e'+(BT.ehp/BT.ehpM<0.3?' low':'')+'"><i style="width:'+Math.max(0,100*BT.ehp/BT.ehpM)+'%"></i></div><div class="hpnum">'+Math.max(0,BT.ehp)+'/'+BT.ehpM+'</div></div></div>';
  h+='<div class="log">';var max=BT.log.length<10?BT.log.length:10;for(var i=0;i<max;i++)h+=BT.log[i];
  h+='</div><div class="bbtns"><button class="btn" data-act="hit"><i class=ddi data-s=sword></i> Ударить</button><button class="btn" data-act="potion"'+(S.pot<1?' disabled':'')+'><i class=ddi data-s=potion></i> ('+S.pot+')</button><button class="btn" data-act="scrollbtn"'+(S.scroll<1||BT.scrollUsed?' disabled':'')+'><i class=ddi data-s=scroll></i> ('+S.scroll+')</button></div>';
  h+='<div class="bbtns"><button class="btn red" data-act="auto">'+(BT.auto?'⏸ Авто: ВКЛ':'▶ Авто-бой')+'</button></div>';
@@ -737,8 +766,9 @@ function endBattle(win){
  BT=null;checkAch();renderRaid();renderStats();save();
 }
 
-function usePotion(){if(!BT||S.pot<1)return;S.pot--;var heal=Math.round(BT.hhpM*0.5);BT.hhp=Math.min(BT.hhpM,BT.hhp+heal);qAdd('pots',1);tgHaptic('light');BT.log.unshift('<div class="ln s"><i class=ddi data-s=potion></i> Зелье: +'+heal+' HP</div>');renderBattle();save();}
-function useScroll(){if(!BT||BT.scrollUsed||S.scroll<1)return;S.scroll--;BT.scrollUsed=true;BT.log.unshift('<div class="ln s"><i class=ddi data-s=scroll></i> Свиток: лут ×2</div>');renderBattle();save();}
+function lvlFx(n){var d=document.createElement('div');d.id='lvlFx';d.innerHTML='<div class="ltxt"><i class=ddi data-s=spark></i> УРОВЕНЬ '+n+'!</div>';document.body.appendChild(d);dhydrate(d);setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d)},1700);}
+function usePotion(){if(!BT||S.pot<1)return;S.pot--;var heal=Math.round(BT.hhpM*0.5);BT.hhp=Math.min(BT.hhpM,BT.hhp+heal);qAdd('pots',1);tgHaptic('light');BT.log.unshift('<div class="ln s"><i class=ddi data-s=potion></i> Зелье: +'+heal+' HP</div>');renderBattle();flashFx('heal','+'+heal);save();}
+function useScroll(){if(!BT||BT.scrollUsed||S.scroll<1)return;S.scroll--;BT.scrollUsed=true;BT.log.unshift('<div class="ln s"><i class=ddi data-s=scroll></i> Свиток: лут ×2</div>');renderBattle();flashFx('xp','×2');save();}
 
 function firstEmpty(){var r,col;for(r=0;r<4;r++)for(col=0;col<5;col++){var id=r+'_'+col;if(!S.buildings[id])return id;}return null;}
 
@@ -978,7 +1008,7 @@ function switchTab(v){
 }
 
 /* ДЕЛЕГИРОВАНИЕ СОБЫТИЙ */
-document.addEventListener('click',function(e){
+document.addEventListener('click',function(e){try{
  var el=e.target.closest('[data-act]');if(!el)return;var act=el.dataset.act;
  if(act==='tab')switchTab(el.dataset.v);
  else if(act==='closeOv'){hideOverlay();}
@@ -1004,9 +1034,9 @@ document.addEventListener('click',function(e){
  else if(act==='addstat'){var v=el.dataset.v;if(S.hero.pts>0){S.hero[v]++;S.hero.pts--;tgHaptic('light');save();renderHero();}}
  else if(act==='raid')startRaid(el.dataset.k);
  else if(act==='exp_step')expStep();
- else if(act==='exp_return'){if(EXP.ore>0)S.ore=Math.min(cap(),S.ore+EXP.ore);if(EXP.xp>0)addXp(EXP.xp);tgHaptic('success');toast('Вы вернулись с '+EXP.ore+' р.');EXP={depth:0,ore:0,xp:0,step:0,inProgress:false,enemy:null};renderRaid();renderStats();save();}
+ else if(act==='exp_return'){if(EXP.ore>0)S.ore=Math.min(cap(),S.ore+EXP.ore);if(EXP.xp>0)addXp(EXP.xp);tgHaptic('success');toast('Вы вернулись с '+EXP.ore+' руды');EXP={depth:0,ore:0,xp:0,step:0,inProgress:false,enemy:null};renderRaid();renderStats();save();}
  else if(act==='exp_bribe'){var cost2=Math.floor(EXP.enemy.R.cost*1.5+EXP.depth*5);if(S.ore<cost2){toast('Мало руды','error');return;}S.ore-=cost2;toast('Вы откупились');closeOv();EXP.enemy=null;renderRaid();renderStats();save();}
- else if(act==='exp_flee'){var lost=Math.floor(EXP.ore*0.5);EXP.ore-=lost;toast('Сбежали, потеряв '+lost+' р.','warning');closeOv();EXP.enemy=null;renderRaid();save();}
+ else if(act==='exp_flee'){var lost=Math.floor(EXP.ore*0.5);EXP.ore-=lost;toast('Сбежали, потеряв '+lost+' руды','warning');closeOv();EXP.enemy=null;renderRaid();save();}
  else if(act==='exp_fight'){var ek=EXP.enemy.key;closeOv();startRaid(ek, true);}
  else if(act==='exp_after_battle'){closeOv();S.raidTab='expedition';renderRaid();}
  else if(act==='hit')battleStep();
@@ -1037,9 +1067,9 @@ document.addEventListener('click',function(e){
  else if(act==='noop')toast('Недоступно','warning');
  else if(act==='watch_ad'){watchAd();}
  else if(act==='closeAdReward'){closeOv();renderMore();}
- else if(act==='share'){var bot=CONFIG.telegramBot;if(!bot||bot.indexOf('your_bot')===0){toast('Ссылка скоро появится — бот ещё не подключён');return;}var ref=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user&&tg.initDataUnsafe.user.id)||'guest';var url='https://t.me/'+bot+'?startapp=ref'+ref;var txt='Мой рудник — этаж '+S.floor+'! Залетай:';if(tg&&tg.openTelegramLink){tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(txt));}else if(navigator.share){navigator.share({text:txt+' '+url}).catch(function(){});}else if(navigator.clipboard){navigator.clipboard.writeText(txt+' '+url);toast('Ссылка скопирована');}}
+ else if(act==='share'){var bot=CONFIG.telegramBot;if(!bot){toast('Ссылка скоро появится — бот ещё не подключён','warning');return;}var ref=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user&&tg.initDataUnsafe.user.id)||'guest';var url='https://t.me/'+bot+'?startapp=ref'+ref;var txt='Мой рудник — этаж '+S.floor+'! Залетай:';if(tg&&tg.openTelegramLink){tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(txt));}else if(navigator.share){navigator.share({text:txt+' '+url}).catch(function(){});}else if(navigator.clipboard){navigator.clipboard.writeText(txt+' '+url);toast('Ссылка скопирована');}}
  else if(act==='reset'){tgConfirm('Сбросить весь прогресс? Это необратимо.',function(){localStorage.removeItem(KEY);S=freshS();renderAll();save();checkStory();});}
-});
+}catch(err){console.error("act",err);}});
 
 function buyItem(k){var d=ITEMS[k];if(S.hero.lvl<d.lvl){toast('<i class=ddi data-s=lock></i> Нужен уровень '+d.lvl,'error');return;}if(S.bag.length>=bagMax()){toast('Рюкзак полон','error');return;}if(d.cur==='ore'){if(S.ore<d.price){toast('Мало руды ('+d.price+')','error');return;}S.ore-=d.price;}else{if(S.star<d.price){toast('Мало звёзд ('+d.price+'<i class=ddi data-s=star></i>)','error');return;}S.star-=d.price;}S.bag.push({u:S.uid++,id:k});tgHaptic('light');toast((d.cur==='star'?'<i class=ddi data-s=moon></i> Куплено: ':'Куплено: ')+d.n);renderAll();save();}
 function buyAb(k){var i;for(i=0;i<ABIL.length;i++){var ab=ABIL[i];if(ab.id!==k)continue;if(S.abil[k])return;if(ab.cur==='ore'){if(S.ore<ab.price){toast('Мало руды','error');return;}S.ore-=ab.price;}else{if(S.star<ab.price){toast('Мало звёзд','error');return;}S.star-=ab.price;}S.abil[k]=1;tgHaptic('success');toast('<i class=ddi data-s=spark></i> Изучено: '+ab.n);}renderAll();save();}
@@ -1067,7 +1097,7 @@ setInterval(function(){
 function welcome(){var gone=(Date.now()-S.lastSeen)/3600000;if(gone>0.25&&oreRate()>0){var mins=Math.min(240,gone*60);var got=Math.floor(oreRate()*60*mins);if(got>0){S.ore=Math.min(cap(),S.ore+got);setTimeout(function(){toast('<i class=ddi data-s=pick></i> Пока вас не было, добыто '+got+' руды');},500);}}S.lastSeen=Date.now();}
 
 load();tgInit();welcome();renderAll();checkStory();giftDaily();tgBackState();
-setInterval(function(){try{tick();}catch(e){console.error('tick',e);}},CONFIG.tickMs);
+setInterval(function(){try{tick();}catch(err){console.error('tick',err);}},CONFIG.tickMs);
 setInterval(function(){S.lastSeen=Date.now();save();},60000);
 document.addEventListener('visibilitychange',function(){if(document.hidden)save();});
 window.addEventListener('pagehide',save);window.addEventListener('beforeunload',save);
@@ -1155,15 +1185,7 @@ portal:D0('<circle cx="50" cy="50" r="36" fill="none" stroke="#7a3bd0" stroke-wi
 function dhydrate(root){if(!root||!root.querySelectorAll)return;root.querySelectorAll('.ddi').forEach(function(el){if(el.getAttribute('data-on'))return;el.setAttribute('data-on','1');var s=DD_SC[el.getAttribute('data-s')];if(s)el.innerHTML=s;})}
 function ddSplash(){var d=document.createElement('div');d.id='ddSplash';d.innerHTML='<div class="dd-ring"></div><div class="dd-ring r2"></div><div class="ddi dd-bighero" data-s="hero"></div><h1>DARK DUNGEON</h1><div class="dd-sub">TAP TO ENTER</div>';dhydrate(d);document.body.appendChild(d);var g=function(){if(!d.parentNode)return;d.classList.add('gone');setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d)},600)};setTimeout(g,2600);d.addEventListener('click',g)}
 dhydrate(document.body);
-try{
-var _ddT=null;
-new MutationObserver(function(muts){
- var fresh=false;for(var i=0;i<muts.length;i++){if(muts[i].addedNodes&&muts[i].addedNodes.length){fresh=true;break;}}
- if(!fresh)return;
- if(_ddT)return;
- _ddT=setTimeout(function(){_ddT=null;dhydrate(document.body);},120);
-}).observe(document.documentElement,{childList:true,subtree:true});
-}catch(e){}
+try{var _ddT=null;new MutationObserver(function(muts){var fresh=false;for(var i=0;i<muts.length;i++){if(muts[i].addedNodes&&muts[i].addedNodes.length){fresh=true;break;}}if(!fresh)return;if(_ddT)return;_ddT=setTimeout(function(){_ddT=null;dhydrate(document.body);},120);}).observe(document.documentElement,{childList:true,subtree:true})}catch(e){}
 if(document.readyState!=='loading')ddSplash();else document.addEventListener('DOMContentLoaded',ddSplash);
 
 })();
