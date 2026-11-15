@@ -17,7 +17,7 @@ html, body {
 }
 #game-wrap { position: relative; box-shadow: 0 0 40px rgba(240,200,90,0.3); width: 100%; max-width: 800px; height: 100%; max-height: 600px; display: flex; align-items: center; justify-content: center; }
 #game-container { position: relative; width: 100%; height: 100%; }
-#game { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; background: #1a1a2a; border: 2px solid #f0c85a; touch-action: none; }
+#game { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; background: #6ab84a; border: 2px solid #f0c85a; touch-action: none; }
 .hud { position: absolute; pointer-events: none; }
 #hud-top { top: 8px; left: 8px; right: 8px; display: flex; gap: 8px; align-items: flex-start; }
 .bar { background: #0a0a0a; border: 2px solid #2a2a3a; padding: 4px 8px; font-size: 11px; min-width: 140px; position: relative; }
@@ -152,7 +152,7 @@ html, body {
 
 <script>
 // ============================================================
-// SPRITES
+// SPRITES (Base64)
 // ============================================================
 const RAW_SPRITES = {
   grass: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges"><rect width="16" height="16" fill="#6ab84a"/><rect x="2" y="3" width="1" height="1" fill="#7ac85a"/><rect x="6" y="1" width="1" height="1" fill="#7ac85a"/><rect x="11" y="4" width="1" height="1" fill="#7ac85a"/><rect x="13" y="10" width="1" height="1" fill="#7ac85a"/><rect x="3" y="11" width="1" height="1" fill="#7ac85a"/><rect x="9" y="13" width="1" height="1" fill="#7ac85a"/><rect x="5" y="7" width="1" height="1" fill="#4a8a32"/><rect x="10" y="8" width="1" height="1" fill="#4a8a32"/><rect x="14" y="14" width="1" height="1" fill="#4a8a32"/><rect x="1" y="14" width="1" height="1" fill="#4a8a32"/></svg>`,
@@ -180,7 +180,7 @@ const RAW_SPRITES = {
   hit_fx: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" shape-rendering="crispEdges"><path d="M16 4 L18 12 L26 10 L20 16 L28 18 L20 20 L26 26 L18 22 L16 30 L14 22 L6 26 L12 20 L4 18 L12 16 L6 10 L14 12 Z" fill="#ffe08a"/><path d="M16 8 L17 14 L22 12 L18 16 L24 18 L18 18 L22 22 L17 20 L16 26 L15 20 L10 22 L14 18 L8 18 L14 16 L10 12 L15 14 Z" fill="#ffffff"/><circle cx="16" cy="16" r="3" fill="#ff8a3a"/></svg>`
 };
 
-// Fix for mobile CSP and data limits: Use Base64
+// Безопасное кодирование в Base64 для мобильных браузеров
 const SPRITES = {};
 for (let key in RAW_SPRITES) {
   SPRITES[key] = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(RAW_SPRITES[key])));
@@ -201,6 +201,14 @@ async function loadAllSprites() {
   await Promise.all(promises);
   spritesReady = true;
 }
+
+// Принудительный запуск через 2 секунды, если картинки не загрузились
+setTimeout(() => { 
+    if (!spritesReady) { 
+        console.log("Sprites loading timed out, forcing start."); 
+        spritesReady = true; 
+    } 
+}, 2000);
 
 // ============================================================
 // STATE & WORLD
@@ -732,73 +740,108 @@ function render() {
     ctx.fillText('Загрузка...', canvas.width / 2, canvas.height / 2);
     return;
   }
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Очистка фона
+  ctx.fillStyle = '#1a1a2a'; 
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.save();
-  ctx.translate(-camera.x, -camera.y);
+  if (!player || !map || map.length === 0) return;
+
+  const offsetX = Math.round(camera.x);
+  const offsetY = Math.round(camera.y);
 
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
+      const sx = x * TILE - offsetX;
+      const sy = y * TILE - offsetY;
+      
+      if (sx < -TILE || sx > canvas.width || sy < -TILE || sy > canvas.height) continue;
+
       const t = map[y][x];
+      
+      // Fallback цвет, если картинки не загрузятся
+      ctx.fillStyle = t === 'grass' ? '#6ab84a' : t === 'dirt' ? '#8a5a2b' : t === 'water' ? '#3a8ad8' : t === 'tree' ? '#2a6332' : t === 'rock' ? '#6a6a7a' : '#000';
+      ctx.fillRect(sx, sy, TILE, TILE);
+
+      // Отрисовка картинки (если загрузилась)
       const img = IMG[t];
-      if (img) {
-        ctx.drawImage(img, x * TILE, y * TILE, TILE, TILE);
-      } else {
-        // Fallback color if image fails to load
-        ctx.fillStyle = t === 'grass' ? '#6ab84a' : t === 'dirt' ? '#8a5a2b' : t === 'water' ? '#3a8ad8' : t === 'tree' ? '#2a6332' : t === 'rock' ? '#6a6a7a' : '#000';
-        ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+      if (img && img.complete && img.naturalWidth > 0) {
+        ctx.drawImage(img, sx, sy, TILE, TILE);
       }
     }
   }
 
   for (const b of buildings) {
+    const sx = b.gx * TILE - offsetX;
+    const sy = b.gy * TILE - offsetY;
+    const w = b.w * TILE;
+    const h = b.h * TILE;
+    
+    // Fallback
+    ctx.fillStyle = '#c9a24a';
+    ctx.fillRect(sx, sy, w, h);
+
     const img = IMG[b.sprite];
-    if (img) ctx.drawImage(img, b.gx * TILE, b.gy * TILE, b.w * TILE, b.h * TILE);
-    else {
-      ctx.fillStyle = '#c9a24a'; // Fallback building
-      ctx.fillRect(b.gx * TILE, b.gy * TILE, b.w * TILE, b.h * TILE);
+    if (img && img.complete && img.naturalWidth > 0) {
+      ctx.drawImage(img, sx, sy, w, h);
     }
   }
 
   for (const e of entities) {
     if (!e.alive) continue;
-    const img = IMG[e.sprite];
+    
+    const sx = e.gx * TILE - offsetX;
+    const sy = e.gy * TILE - offsetY;
     const w = e.w === 2 ? TILE * 2 : TILE;
-    if (img) {
-      ctx.drawImage(img, e.gx * TILE, e.gy * TILE, w, w);
-    } else {
-      ctx.fillStyle = e.type === 'enemy' ? '#ff3a3a' : '#5ad8ff';
-      ctx.fillRect(e.gx * TILE, e.gy * TILE, w, w);
+
+    // Fallback
+    ctx.fillStyle = e.type === 'enemy' ? '#ff3a3a' : '#5ad8ff';
+    ctx.fillRect(sx, sy, w, w);
+
+    const img = IMG[e.sprite];
+    if (img && img.complete && img.naturalWidth > 0) {
+      ctx.drawImage(img, sx, sy, w, w);
     }
+    
     if (e.type === 'enemy' && e.hp < e.hpMax) {
-      const bx = e.gx * TILE, by = e.gy * TILE - 6;
-      ctx.fillStyle = '#0a0a0a'; ctx.fillRect(bx, by, w, 4);
-      ctx.fillStyle = '#ff3a3a'; ctx.fillRect(bx, by, w * (e.hp / e.hpMax), 4);
+      ctx.fillStyle = '#0a0a0a'; ctx.fillRect(sx, sy - 6, w, 4);
+      ctx.fillStyle = '#ff3a3a'; ctx.fillRect(sx, sy - 6, w * (e.hp / e.hpMax), 4);
     }
   }
 
   if (player && player.hp > 0) {
     if (player.invulnTimer > 0 && Math.floor(gameTime * 20) % 2 === 0) ctx.globalAlpha = 0.5;
+    
+    const sx = player.x - offsetX;
+    const sy = player.y - offsetY;
+
+    // Fallback (ярко-красный игрок)
+    ctx.fillStyle = '#ff0000';
+    ctx.fillRect(sx, sy, TILE, TILE);
+
     const img = IMG[player.sprite];
-    if (img) {
-      ctx.drawImage(img, player.x, player.y, TILE, TILE);
-    } else {
-      ctx.fillStyle = '#ff0000'; // Fallback player
-      ctx.fillRect(player.x, player.y, TILE, TILE);
+    if (img && img.complete && img.naturalWidth > 0) {
+      ctx.drawImage(img, sx, sy, TILE, TILE);
     }
     ctx.globalAlpha = 1;
   }
 
   for (const p of particles) {
+    const sx = p.x - TILE / 2 - offsetX;
+    const sy = p.y - TILE / 2 - offsetY;
+    
+    // Fallback
+    ctx.fillStyle = '#ffff00';
+    ctx.fillRect(sx, sy, TILE, TILE);
+
     const img = IMG['hit_fx'];
-    if (img) {
+    if (img && img.complete && img.naturalWidth > 0) {
       ctx.globalAlpha = p.life / p.maxLife;
-      ctx.drawImage(img, p.x - TILE / 2, p.y - TILE / 2, TILE, TILE);
+      ctx.drawImage(img, sx, sy, TILE, TILE);
       ctx.globalAlpha = 1;
     }
   }
-
-  ctx.restore();
+  
   renderMinimap();
 }
 
@@ -806,6 +849,9 @@ function renderMinimap() {
   const mw = minimap.width, mh = minimap.height;
   const sx = mw / MAP_W, sy = mh / MAP_H;
   mmCtx.clearRect(0, 0, mw, mh);
+  
+  if (!map || map.length === 0) return;
+
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
       const t = map[y][x];
@@ -839,7 +885,17 @@ function renderClassCards() {
   for (const [key, cls] of Object.entries(CLASSES)) {
     const card = document.createElement('div');
     card.className = 'class-card' + (key === pendingClass ? ' selected' : '');
-    card.innerHTML = `<img src="${IMG[cls.sprite].src}" alt="${cls.name}"><div class="name">${cls.name}</div><div class="stats">HP ${cls.hp} · MP ${cls.mp}</div>`;
+    
+    // Для карточек используем fallback цвета, если картинки нет
+    const imgSrc = IMG[cls.sprite] ? IMG[cls.sprite].src : '';
+    card.innerHTML = `
+      <div style="width:48px; height:48px; margin:0 auto; background:#2a2a3a; display:flex; align-items:center; justify-content:center;">
+        ${imgSrc ? `<img src="${imgSrc}" style="width:100%; height:100%; image-rendering:pixelated;">` : `<span style="color:#fff;font-size:24px;">⚔</span>`}
+      </div>
+      <div class="name">${cls.name}</div>
+      <div class="stats">HP ${cls.hp} · MP ${cls.mp}</div>
+    `;
+    
     card.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       pendingClass = key;
