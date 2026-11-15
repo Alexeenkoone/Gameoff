@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Элдория RPG</title>
+<style>
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: #0a0a0a;
+  color: #e0e0e8;
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  width: 100vw; height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+}
+#game-wrap { position: relative; box-shadow: 0 0 40px rgba(240,200,90,0.3); }
+#game { display: block; image-rendering: pixelated; image-rendering: crisp-edges; background: #1a1a2a; border: 2px solid #f0c85a; }
+.hud { position: absolute; pointer-events: none; }
+#hud-top { top: 8px; left: 8px; right: 8px; display: flex; gap: 8px; align-items: flex-start; }
+.bar { background: #0a0a0a; border: 2px solid #2a2a3a; padding: 4px 8px; font-size: 11px; min-width: 160px; position: relative; }
+.bar .fill { height: 8px; background: #c23a3a; margin-top: 4px; transition: width 0.2s; }
+.bar.mp .fill { background: #3a8ad8; }
+.bar.xp .fill { background: #f0c85a; }
+.bar .label { font-size: 10px; color: #a0a0a8; }
+.bar .value { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: bold; text-shadow: 1px 1px 0 #000; margin-top: 4px; }
+#minimap-wrap { position: absolute; top: 8px; right: 8px; background: #0a0a0a; border: 2px solid #f0c85a; padding: 2px; }
+#minimap { display: block; image-rendering: pixelated; }
+#hud-bottom { bottom: 8px; left: 8px; right: 8px; display: flex; gap: 8px; justify-content: space-between; font-size: 11px; color: #8a8a9a; flex-wrap: wrap; }
+.key-hint { background: #1a1a2a; padding: 2px 6px; border: 1px solid #2a2a3a; }
+.modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a1a2a; border: 3px solid #f0c85a; box-shadow: 0 0 20px rgba(0,0,0,0.8); padding: 20px; min-width: 320px; max-width: 90%; display: none; z-index: 10; }
+.modal.active { display: block; }
+.modal h2 { margin: 0 0 12px; color: #f0c85a; font-size: 16px; text-align: center; text-transform: uppercase; }
+.modal p { font-size: 12px; line-height: 1.5; margin: 6px 0; }
+.modal button { background: #2a2a3a; border: 2px solid #f0c85a; color: #e0e0e8; padding: 6px 12px; font-family: inherit; font-size: 12px; cursor: pointer; margin: 4px; }
+.modal button:hover { background: #3a3a4a; color: #f0c85a; }
+.class-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 12px 0; }
+.class-card { background: #2a2a3a; border: 2px solid #4a4a5a; padding: 8px; cursor: pointer; text-align: center; transition: all 0.2s; }
+.class-card:hover { border-color: #f0c85a; background: #3a3a4a; }
+.class-card.selected { border-color: #5aff8a; background: #2a3a2a; }
+.class-card img { width: 64px; height: 64px; image-rendering: pixelated; display: block; margin: 0 auto; }
+.class-card .name { font-size: 11px; margin-top: 4px; }
+.class-card .stats { font-size: 9px; color: #8a8a9a; }
+.inv-grid { display: grid; grid-template-columns: repeat(5, 48px); gap: 4px; margin: 8px 0; justify-content: center; }
+.inv-slot { width: 48px; height: 48px; background: #1a1a2a; border: 2px solid #4a4a5a; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+.inv-slot:hover { border-color: #f0c85a; }
+.inv-slot img { width: 40px; height: 40px; image-rendering: pixelated; }
+.inv-slot .rarity { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; }
+.rarity.common { background: #8a8a9a; }
+.rarity.rare { background: #4a8aff; }
+.rarity.epic { background: #a85aff; }
+.rarity.legendary { background: #f0c85a; }
+.equip-slots { display: flex; gap: 16px; margin: 12px 0; justify-content: center; }
+.equip-slot { width: 48px; height: 48px; background: #1a1a2a; border: 2px solid #6a6a7a; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+.equip-slot img { width: 40px; height: 40px; image-rendering: pixelated; }
+.equip-slot .slot-label { position: absolute; bottom: -14px; font-size: 9px; color: #8a8a9a; width: 100%; text-align: center; }
+.btn-close { position: absolute; top: 4px; right: 4px; background: #8a2a2a; border: 1px solid #c23a3a; color: #fff; width: 22px; height: 22px; font-size: 14px; cursor: pointer; padding: 0; line-height: 1; }
+.quest-item { background: #2a2a3a; padding: 8px; margin: 4px 0; border-left: 3px solid #f0c85a; font-size: 11px; }
+.quest-item.done { border-left-color: #5aff8a; opacity: 0.7; }
+.toast { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); background: #1a1a2a; border: 2px solid #f0c85a; padding: 8px 16px; font-size: 12px; animation: toast-in 0.3s ease-out; pointer-events: none; z-index: 20; }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+#dmg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 5; }
+.float-text { position: absolute; font-weight: bold; font-size: 14px; text-shadow: 2px 2px 0 #000; animation: float-up 0.8s ease-out forwards; }
+@keyframes float-up { to { transform: translateY(-30px); opacity: 0; } }
+</style>
+</head>
+<body>
+<div id="game-wrap">
+  <canvas id="game" width="640" height="480"></canvas>
+  <div id="hud-top" class="hud">
+    <div>
+      <div class="bar hp"><div class="label">HP</div><div class="fill" id="hp-fill" style="width:100%"></div><div class="value" id="hp-val">100/100</div></div>
+      <div class="bar mp" style="margin-top:4px"><div class="label">MP</div><div class="fill" id="mp-fill" style="width:100%"></div><div class="value" id="mp-val">20/20</div></div>
+    </div>
+    <div class="bar xp"><div class="label" id="lvl-label">LVL 1</div><div class="fill" id="xp-fill" style="width:0%"></div><div class="value" id="xp-val">0/100</div></div>
+    <div style="margin-left:auto;font-size:12px;background:#1a1a2a;padding:6px 10px;border:2px solid #f0c85a">🪙 <span id="gold-val">0</span></div>
+  </div>
+  <div id="minimap-wrap" class="hud"><canvas id="minimap" width="120" height="90"></canvas></div>
+  <div id="hud-bottom" class="hud">
+    <span><span class="key-hint">WASD/↑↓←→</span> движение</span>
+    <span><span class="key-hint">SPACE</span> атака</span>
+    <span><span class="key-hint">E</span> говорить</span>
+    <span><span class="key-hint">I</span> инвентарь</span>
+    <span><span class="key-hint">Q</span> квесты</span>
+  </div>
+  <div id="dmg-layer"></div>
+
+  <div id="start-modal" class="modal active">
+    <h2>⚔ Элдория ⚔</h2>
+    <p style="text-align:center;color:#a0a0a8">Выбери свой класс</p>
+    <div class="class-grid" id="class-grid"></div>
+    <div style="text-align:center"><button id="start-btn">Начать приключение</button></div>
+  </div>
+
+  <div id="inv-modal" class="modal">
+    <button class="btn-close" data-close="inv-modal">×</button>
+    <h2>Инвентарь</h2>
+    <p style="text-align:center;color:#8a8a9a;font-size:10px">Экипировка</p>
+    <div class="equip-slots">
+      <div class="equip-slot" data-slot="head"><span class="slot-label">Шлем</span></div>
+      <div class="equip-slot" data-slot="chest"><span class="slot-label">Броня</span></div>
+      <div class="equip-slot" data-slot="weapon"><span class="slot-label">Оружие</span></div>
+    </div>
+    <p style="text-align:center;color:#8a8a9a;font-size:10px;margin-top:20px">Предметы</p>
+    <div class="inv-grid" id="inv-grid"></div>
+    <p style="font-size:10px;color:#6a6a7a;text-align:center">Клик — экипировать/использовать</p>
+  </div>
+
+  <div id="quest-modal" class="modal">
+    <button class="btn-close" data-close="quest-modal">×</button>
+    <h2>Журнал квестов</h2>
+    <div id="quest-list"></div>
+  </div>
+
+  <div id="dialogue-modal" class="modal">
+    <h2 id="dialogue-name">NPC</h2>
+    <p id="dialogue-text"></p>
+    <div id="dialogue-actions" style="text-align:center"></div>
+  </div>
+
+  <div id="gameover-modal" class="modal">
+    <h2 style="color:#ff5a5a">☠ Вы погибли ☠</h2>
+    <p id="death-stats" style="text-align:center"></p>
+    <div style="text-align:center;margin-top:12px"><button id="restart-btn">Начать заново</button></div>
+  </div>
+
+  <div id="victory-modal" class="modal">
+    <h2 style="color:#5aff8a">🏆 Победа! 🏆</h2>
+    <p style="text-align:center">Вы победили дракона!</p>
+    <p id="victory-stats" style="text-align:center"></p>
+    <div style="text-align:center;margin-top:12px"><button id="victory-restart-btn">Играть снова</button></div>
+  </div>
+</div>
+<script>
+// ============================================================
+// SPRITES
+// ============================================================
+const SPRITES = {
+  grass: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges"><rect width="16" height="16" fill="#6ab84a"/><rect x="2" y="3" width="1" height="1" fill="#7ac85a"/><rect x="6" y="1" width="1" height="1" fill="#7ac85a"/><rect x="11" y="4" width="1" height="1" fill="#7ac85a"/><rect x="13" y="10" width="1" height="1" fill="#7ac85a"/><rect x="3" y="11" width="1" height="1" fill="#7ac85a"/><rect x="9" y="13" width="1" height="1" fill="#7ac85a"/><rect x="5" y="7" width="1" height="1" fill="#4a8a32"/><rect x="10" y="8" width="1" height="1" fill="#4a8a32"/><rect x="14" y="14" width="1" height="1" fill="#4a8a32"/><rect x="1" y="14" width="1" height="1" fill="#4a8a32"/></svg>`,
+  dirt: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges"><rect width="16" height="16" fill="#8a5a2b"/><rect x="2" y="2" width="2" height="1" fill="#a87a4a"/><rect x="7" y="4" width="1" height="1" fill="#a87a4a"/><rect x="12" y="3" width="2" height="1" fill="#a87a4a"/><rect x="4" y="8" width="1" height="1" fill="#a87a4a"/><rect x="10" y="10" width="2" height="1" fill="#a87a4a"/><rect x="13" y="13" width="1" height="1" fill="#a87a4a"/><rect x="3" y="13" width="1" height="1" fill="#6b4423"/><rect x="8" y="8" width="1" height="1" fill="#6b4423"/><rect x="14" y="8" width="1" height="1" fill="#6b4423"/><rect x="6" y="14" width="1" height="1" fill="#6b4423"/></svg>`,
+  water: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges"><rect width="16" height="16" fill="#3a8ad8"/><rect x="1" y="3" width="4" height="1" fill="#7ac8ff"/><rect x="8" y="6" width="4" height="1" fill="#7ac8ff"/><rect x="3" y="10" width="4" height="1" fill="#7ac8ff"/><rect x="11" y="13" width="4" height="1" fill="#7ac8ff"/><rect x="0" y="0" width="2" height="1" fill="#1a5aa8"/><rect x="13" y="2" width="3" height="1" fill="#1a5aa8"/><rect x="6" y="8" width="2" height="1" fill="#1a5aa8"/><rect x="0" y="12" width="3" height="1" fill="#1a5aa8"/></svg>`,
+  stone: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges"><rect width="16" height="16" fill="#8a8a9a"/><rect x="0" y="8" width="16" height="1" fill="#6a6a7a"/><rect x="8" y="0" width="1" height="8" fill="#6a6a7a"/><rect x="0" y="8" width="1" height="8" fill="#6a6a7a"/><rect x="12" y="9" width="1" height="7" fill="#6a6a7a"/><rect x="1" y="1" width="3" height="1" fill="#aaaaaa"/><rect x="9" y="1" width="3" height="1" fill="#aaaaaa"/><rect x="1" y="9" width="3" height="1" fill="#aaaaaa"/><rect x="13" y="9" width="2" height="1" fill="#aaaaaa"/></svg>`,
+  warrior: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" shape-rendering="crispEdges"><path fill="#171720" d="M10 3h12v1h-12zM10 4h1v1h-1zM21 4h1v1h-1zM10 5h1v1h-1zM21 5h1v1h-1zM10 6h1v1h-1zM21 6h1v1h-1zM10 7h1v1h-1zM13 7h1v1h-1zM18 7h1v1h-1zM21 7h1v1h-1zM10 8h1v1h-1zM21 8h1v1h-1zM10 9h1v1h-1zM21 9h1v1h-1zM10 10h1v1h-1zM21 10h1v1h-1zM6 12h1v1h-1zM25 12h1v1h-1zM6 13h1v1h-1zM11 13h1v1h-1zM20 13h1v1h-1zM25 13h1v1h-1zM6 14h1v1h-1zM11 14h1v1h-1zM20 14h1v1h-1zM25 14h1v1h-1zM7 15h1v1h-1zM11 15h1v1h-1zM20 15h1v1h-1zM24 15h1v1h-1zM7 16h1v1h-1zM11 16h1v1h-1zM20 16h1v1h-1zM24 16h1v1h-1zM8 17h1v1h-1zM11 17h1v1h-1zM20 17h1v1h-1zM23 17h1v1h-1zM8 18h1v1h-1zM11 18h1v1h-1zM20 18h1v1h-1zM23 18h1v1h-1zM8 19h1v1h-1zM11 19h1v1h-1zM20 19h1v1h-1zM23 19h1v1h-1zM8 20h1v1h-1zM11 20h1v1h-1zM20 20h1v1h-1zM23 20h1v1h-1zM8 21h1v1h-1zM11 21h1v1h-1zM20 21h1v1h-1zM23 21h1v1h-1zM8 22h1v1h-1zM11 22h1v1h-1zM20 22h1v1h-1zM23 22h1v1h-1zM9 23h1v1h-1zM22 23h1v1h-1zM11 24h1v1h-1zM20 24h1v1h-1zM11 25h1v1h-1zM20 25h1v1h-1zM11 26h1v1h-1zM15 26h2v1h-2zM20 26h1v1h-1zM11 27h1v1h-1zM15 27h2v1h-2zM20 27h1v1h-1zM11 28h1v1h-1zM15 28h2v1h-2zM20 28h1v1h-1zM11 29h1v1h-1zM15 29h2v1h-2zM20 29h1v1h-1zM10 30h1v1h-1zM15 30h2v1h-2zM21 30h1v1h-1zM10 31h5v1h-5zM16 31h5v1h-5z"/><path fill="#e2e8f2" d="M11 4h10v1h-10zM12 5h8v1h-8zM7 12h4v1h-4zM21 12h4v1h-4z"/><path fill="#98a2b6" d="M11 5h1v1h-1zM20 5h1v1h-1zM11 6h1v1h-1zM20 6h1v1h-1zM11 7h1v1h-1zM20 7h1v1h-1zM11 8h1v1h-1zM20 8h1v1h-1zM11 9h1v1h-1zM20 9h1v1h-1zM11 10h2v1h-2zM19 10h2v1h-2zM7 13h4v1h-4zM21 13h4v1h-4zM7 14h4v1h-4zM21 14h4v1h-4zM8 15h3v1h-3zM21 15h3v1h-3zM8 16h3v1h-3zM21 16h3v1h-3zM9 17h2v1h-2zM21 17h2v1h-2z"/><path fill="#5a6274" d="M11 12h10v1h-10zM12 26h3v1h-3zM17 26h3v1h-3zM12 27h3v1h-3zM17 27h3v1h-3zM12 28h3v1h-3zM17 28h3v1h-3zM12 29h3v1h-3zM17 29h3v1h-3z"/><path fill="#eab08a" d="M12 6h8v1h-8zM12 7h1v1h-1zM14 7h4v1h-4zM19 7h1v1h-1zM12 8h8v1h-8zM12 9h2v1h-2zM18 9h2v1h-2zM13 10h6v1h-6zM14 11h4v1h-4zM9 18h2v1h-2zM21 18h2v1h-2zM9 19h2v1h-2zM21 19h2v1h-2zM9 20h2v1h-2zM21 20h2v1h-2zM9 21h2v1h-2zM21 21h2v1h-2zM9 22h2v1h-2zM21 22h2v1h-2zM10 23h2v1h-2zM20 23h2v1h-2z"/><path fill="#c68a63" d="M14 9h4v1h-4z"/><path fill="#c2313a" d="M15 1h2v1h-2zM14 2h4v1h-4zM12 13h8v1h-8zM12 14h8v1h-8zM12 15h8v1h-8zM12 16h8v1h-8zM12 17h8v1h-8zM12 18h8v1h-8zM12 19h8v1h-8zM12 21h8v1h-8zM12 22h8v1h-8zM12 23h8v1h-8zM12 24h8v1h-8z"/><path fill="#7a1a22" d="M12 25h8v1h-8z"/><path fill="#f0c85a" d="M12 20h8v1h-8z"/><path fill="#6b4423" d="M11 30h4v1h-4zM17 30h4v1h-4z"/></svg>`,
+  goblin: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" shape-rendering="crispEdges"><rect y="30" width="32" height="2" fill="#2a1c10"/><rect x="12" y="14" width="8" height="12" fill="#6a8a3a"/><rect x="11" y="16" width="3" height="10" fill="#6a8a3a"/><rect x="18" y="16" width="3" height="10" fill="#6a8a3a"/><rect x="11" y="24" width="4" height="6" fill="#4a6a1a"/><rect x="17" y="24" width="4" height="6" fill="#4a6a1a"/><rect x="10" y="28" width="5" height="2" fill="#3a2010"/><rect x="17" y="28" width="5" height="2" fill="#3a2010"/><circle cx="16" cy="8" r="6" fill="#7a9a4a"/><path d="M8 4 L2 2 L6 6 Z" fill="#7a9a4a"/><path d="M24 4 L30 2 L26 6 Z" fill="#7a9a4a"/><rect x="12" y="6" width="2" height="2" fill="#ff3a3a"/><rect x="18" y="6" width="2" height="2" fill="#ff3a3a"/><rect x="14" y="10" width="4" height="2" fill="#2a1c10"/><rect x="14" y="10" width="1" height="1" fill="#e0e0e8"/><rect x="17" y="10" width="1" height="1" fill="#e0e0e8"/><rect x="24" y="14" width="1" height="10" fill="#8a5a2b"/><path d="M22 14 L27 14 L25 10 L24 10 Z" fill="#aaaaaa"/><rect x="7" y="18" width="1" height="8" fill="#8a5a2b"/></svg>`,
+  wolf: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" shape-rendering="crispEdges"><rect y="30" width="32" height="2" fill="#2a1c10"/><ellipse cx="16" cy="20" rx="12" ry="6" fill="#6a6a7a"/><ellipse cx="16" cy="18" rx="12" ry="5" fill="#8a8a9a"/><ellipse cx="14" cy="16" rx="8" ry="3" fill="#aaaaaa"/><rect x="6" y="24" width="3" height="6" fill="#4a4a5a"/><rect x="22" y="24" width="3" height="6" fill="#4a4a5a"/><rect x="10" y="24" width="3" height="6" fill="#5a5a6a"/><rect x="18" y="24" width="3" height="6" fill="#5a5a6a"/><ellipse cx="6" cy="16" rx="5" ry="4" fill="#8a8a9a"/><ellipse cx="6" cy="14" rx="4" ry="3" fill="#aaaaaa"/><path d="M2 12 L0 8 L4 10 Z" fill="#8a8a9a"/><path d="M10 12 L12 8 L8 10 Z" fill="#8a8a9a"/><circle cx="4" cy="14" r="1" fill="#ff3a3a"/><circle cx="8" cy="14" r="1" fill="#ff3a3a"/><rect x="3" y="17" width="6" height="1" fill="#3a2010"/><path d="M28 20 Q30 16 28 12 L30 12 Q32 18 30 22 Z" fill="#5a5a6a"/></svg>`,
+  skeleton: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" shape-rendering="crispEdges"><rect y="30" width="32" height="2" fill="#2a1c10"/><ellipse cx="16" cy="7" rx="6" ry="5" fill="#e0d8c0"/><ellipse cx="16" cy="7" rx="5" ry="4" fill="#f0e8d0"/><circle cx="13" cy="7" r="1.5" fill="#1a1a1a"/><circle cx="19" cy="7" r="1.5" fill="#1a1a1a"/><rect x="14" y="10" width="4" height="2" fill="#1a1a1a"/><rect x="14" y="10" width="1" height="1" fill="#e0d8c0"/><rect x="15" y="10" width="1" height="1" fill="#e0d8c0"/><rect x="14" y="12" width="4" height="8" fill="#e0d8c0"/><rect x="14" y="12" width="4" height="1" fill="#f0e8d0"/><rect x="11" y="14" width="3" height="6" fill="#e0d8c0"/><rect x="18" y="14" width="3" height="6" fill="#e0d8c0"/><rect x="11" y="14" width="1" height="6" fill="#c0b8a0"/><rect x="20" y="14" width="1" height="6" fill="#c0b8a0"/><rect x="12" y="20" width="8" height="6" fill="#e0d8c0"/><rect x="12" y="20" width="8" height="1" fill="#f0e8d0"/><rect x="13" y="22" width="1" height="2" fill="#c0b8a0"/><rect x="18" y="22" width="1" height="2" fill="#c0b8a0"/><rect x="12" y="26" width="3" height="4" fill="#e0d8c0"/><rect x="17" y="26" width="3" height="4" fill="#e0d8c0"/><rect x="12" y="26" width="3" height="1" fill="#c0b8a0"/><rect x="17" y="26" width="3" height="1" fill="#c0b8a0"/><rect x="25" y="14" width="1" height="10" fill="#8a5a2b"/><rect x="22" y="12" width="8" height="2" fill="#8a6a4a"/><rect x="22" y="12" width="8" height="1" fill="#c9a24a"/><rect x="21" y="14" width="2" height="8" fill="#8a5a2b"/><rect x="4" y="14" width="8" height="2" fill="#6a6a7a"/><rect x="4" y="12" width="1" height="6" fill="#4a4a5a"/></svg>`,
+  dragon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" shape-rendering="crispEdges"><rect y="60" width="64" height="4" fill="#2a1c10"/><rect y="56" width="64" height="4" fill="#4a2c16"/><ellipse cx="32" cy="40" rx="18" ry="14" fill="#a83a2a"/><ellipse cx="30" cy="36" rx="14" ry="10" fill="#c24a3a"/><ellipse cx="28" cy="32" rx="8" ry="5" fill="#e04a3a"/><path d="M14 30 Q4 20 8 12 L14 20 L18 14 L20 24 L22 20 L24 30 Z" fill="#8a2a1a"/><path d="M50 30 Q60 20 56 12 L50 20 L46 14 L44 24 L42 20 L40 30 Z" fill="#8a2a1a"/><path d="M26 34 Q22 20 26 12 L38 12 Q42 20 38 34 Z" fill="#c24a3a"/><ellipse cx="32" cy="10" rx="10" ry="8" fill="#a83a2a"/><ellipse cx="32" cy="8" rx="9" ry="6" fill="#c24a3a"/><ellipse cx="30" cy="6" rx="4" ry="2" fill="#e04a3a"/><path d="M24 4 L18 -2 L22 6 Z" fill="#e0d8c0"/><path d="M40 4 L46 -2 L42 6 Z" fill="#e0d8c0"/><circle cx="27" cy="8" r="2" fill="#ffe08a"/><circle cx="37" cy="8" r="2" fill="#ffe08a"/><circle cx="27" cy="8" r="1" fill="#1a1a1a"/><circle cx="37" cy="8" r="1" fill="#1a1a1a"/><path d="M26 12 L38 12 L36 16 L34 14 L32 16 L30 14 L28 16 Z" fill="#3a0a0a"/><rect x="30" y="12" width="1" height="2" fill="#e0d8c0"/><rect x="34" y="12" width="1" height="2" fill="#e0d8c0"/><rect x="20" y="50" width="6" height="8" fill="#a83a2a"/><rect x="38" y="50" width="6" height="8" fill="#a83a2a"/><path d="M48 44 Q56 42 60 48 Q58 46 54 48 L50 52 Z" fill="#a83a2a"/><path d="M32 12 Q30 18 32 22 Q34 18 32 12 Z" fill="#ff8a3a" opacity="0.8"/><path d="M30 14 Q29 18 31 20 Q31 17 30 14 Z" fill="#ffe08a" opacity="0.9"/></svg>`,
+  questgiver: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" shape-rendering="crispEdges"><rect y="30" width="32" height="2" fill="#2a1c10"/><path d="M10 10 L22 10 L24 30 L8 30 Z" fill="#6a4ac8"/><path d="M10 10 L22 10 L22 12 L10 12 Z" fill="#9a80e8"/><path d="M10 10 L10 30 L12 30 L12 12 Z" fill="#4a2a8a"/><rect x="14" y="18" width="4" height="8" fill="#4a2a8a"/><circle cx="16" cy="6" r="6" fill="#eab08a"/><path d="M10 4 Q16 -2 22 4 Q22 8 16 6 Q10 8 10 4 Z" fill="#6a4ac8"/><circle cx="14" cy="5" r="1" fill="#2a1c10"/><circle cx="18" cy="5" r="1" fill="#2a1c10"/><rect x="15" y="8" width="2" height="1" fill="#2a1c10"/><rect x="24" y="0" width="6" height="14" fill="#2a1a00"/><rect x="25" y="1" width="4" height="1" fill="#f0c85a"/><rect x="25" y="11" width="4" height="1" fill="#f0c85a"/><rect x="28" y="2" width="1" height="9" fill="#f0c85a"/><rect x="26" y="4" width="2" height="4" fill="#ffe08a"/><rect x="26" y="10" width="2" height="2" fill="#ffe08a"/></svg>`,
+  merchant: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" shape-rendering="crispEdges"><rect y="30" width="32" height="2" fill="#2a1c10"/><rect x="12" y="10" width="8" height="14" fill="#c23a3a"/><rect x="12" y="10" width="8" height="2" fill="#e04a4a"/><rect x="11" y="22" width="4" height="6" fill="#3a2010"/><rect x="17" y="22" width="4" height="6" fill="#3a2010"/><rect x="10" y="28" width="5" height="3" fill="#2a1c10"/><rect x="17" y="28" width="5" height="3" fill="#2a1c10"/><rect x="8" y="14" width="4" height="8" fill="#c23a3a"/><rect x="20" y="14" width="4" height="8" fill="#c23a3a"/><circle cx="16" cy="6" r="6" fill="#eab08a"/><path d="M10 2 L26 2 L24 0 L12 0 Z" fill="#3a2010"/><rect x="8" y="2" width="20" height="3" fill="#3a2010"/><rect x="10" y="5" width="16" height="1" fill="#5a3a2a"/><circle cx="14" cy="5" r="1" fill="#3a2010"/><circle cx="18" cy="5" r="1" fill="#3a2010"/><rect x="14" y="8" width="4" height="1" fill="#3a2010"/><ellipse cx="24" cy="20" rx="3" ry="2" fill="#c9a24a"/><ellipse cx="24" cy="19" rx="3" ry="2" fill="#f0c85a"/><ellipse cx="26" cy="22" rx="3" ry="2" fill="#c9a24a"/><ellipse cx="26" cy="21" rx="3" ry="2" fill="#f0c85a"/></svg>`,
+  townhall: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" shape-rendering="crispEdges"><rect y="56" width="64" height="8" fill="#6ab84a"/><rect y="60" width="64" height="4" fill="#4a8a32"/><rect x="4" y="56" width="56" height="2" fill="#2a2a3a"/><rect x="8" y="24" width="48" height="32" fill="#8a5a2b"/><rect x="8" y="24" width="48" height="2" fill="#a87a4a"/><rect x="8" y="24" width="2" height="32" fill="#6b4423"/><rect x="54" y="24" width="2" height="32" fill="#6b4423"/><g fill="#6b4423"><rect x="8" y="30" width="48" height="1"/><rect x="8" y="38" width="48" height="1"/><rect x="8" y="46" width="48" height="1"/><rect x="20" y="24" width="1" height="32"/><rect x="42" y="24" width="1" height="32"/></g><path d="M4 28 L32 6 L60 28 Z" fill="#c9a24a"/><path d="M4 28 L32 6 L32 28 Z" fill="#e0c060"/><path d="M32 6 L60 28 L58 30 L32 8 Z" fill="#a87a4a"/><rect x="4" y="27" width="56" height="2" fill="#8a6a1e"/><rect x="28" y="40" width="8" height="16" fill="#4a2c16"/><rect x="31.5" y="40" width="1" height="16" fill="#2a1c10"/><circle cx="34" cy="48" r="0.8" fill="#f0c85a"/><rect x="12" y="32" width="5" height="5" fill="#3a2a10"/><rect x="12" y="32" width="5" height="1" fill="#f0c85a"/><rect x="47" y="32" width="5" height="5" fill="#3a2a10"/><rect x="47" y="32" width="5" height="1" fill="#f0c85a"/><rect x="31" y="0" width="2" height="8" fill="#5a3a1a"/><path d="M33 0 L44 3 L33 6 Z" fill="#c23a3a"/></svg>`,
+  house: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" shape-rendering="crispEdges"><rect y="26" width="32" height="6" fill="#6ab84a"/><rect y="30" width="32" height="2" fill="#4a8a32"/><rect x="4" y="26" width="24" height="1" fill="#2a2a3a"/><rect x="4" y="14" width="24" height="13" fill="#8a5a2b"/><rect x="4" y="14" width="24" height="1" fill="#a87a4a"/><rect x="4" y="14" width="1" height="13" fill="#6b4423"/><rect x="27" y="14" width="1" height="13" fill="#6b4423"/><g fill="#6b4423"><rect x="4" y="18" width="24" height="1"/><rect x="4" y="22" width="24" height="1"/></g><path d="M2 16 L16 4 L30 16 Z" fill="#c9a24a"/><path d="M2 16 L16 4 L16 16 Z" fill="#e0c060"/><path d="M16 4 L30 16 L28 18 L16 6 Z" fill="#a87a4a"/><rect x="2" y="15" width="28" height="2" fill="#8a6a1e"/><rect x="13" y="20" width="6" height="7" fill="#4a2c16"/><rect x="13" y="20" width="6" height="1" fill="#2a1c10"/><rect x="13" y="23" width="6" height="1" fill="#2a1c10"/><rect x="7" y="17" width="3" height="3" fill="#3a2a10"/><rect x="7" y="17" width="3" height="1" fill="#f0c85a"/><rect x="22" y="17" width="3" height="3" fill="#3a2a10"/><rect x="22" y="17" width="3" height="1" fill="#f0c85a"/><rect x="24" y="2" width="2" height="4" fill="#5a3a1a"/></svg>`,
+  helmet: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" shape-rendering="crispEdges"><rect x="6" y="6" width="20" height="20" fill="#8a8a9a"/><rect x="6" y="6" width="20" height="2" fill="#aaaaaa"/><rect x="6" y="6" width="2" height="20" fill="#6a6a7a"/><rect x="24" y="6" width="2" height="20" fill="#6a6a7a"/><rect x="10" y="12" width="12" height="4" fill="#2a2a3a"/><rect x="10" y="12" width="12" height="1" fill="#4a4a5a"/><rect x="10" y="22" width="12" height="4" fill="#5a5a6a"/><rect x="6" y="4" width="20" height="4" fill="#6a6a7a"/><rect x="6" y="4" width="20" height="1" fill="#aaaaaa"/></svg>`,
+  chest_armor: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" shape-rendering="crispEdges"><path d="M8 4 L24 4 L26 8 L26 28 L6 28 L6 8 Z" fill="#8a8a9a"/><path d="M8 4 L24 4 L24 6 L8 6 Z" fill="#aaaaaa"/><path d="M8 4 L8 28 L10 28 L10 6 Z" fill="#6a6a7a"/><path d="M22 4 L22 28 L24 28 L24 6 Z" fill="#6a6a7a"/><rect x="14" y="10" width="4" height="10" fill="#6a6a7a"/><rect x="8" y="20" width="16" height="2" fill="#5a5a6a"/><rect x="14" y="24" width="4" height="4" fill="#5a5a6a"/></svg>`,
+  sword: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" shape-rendering="crispEdges"><rect x="28" y="0" width="2" height="2" fill="#aaaaaa"/><rect x="27" y="2" width="2" height="2" fill="#8a8a9a"/><rect x="26" y="4" width="2" height="14" fill="#c0c0d0"/><rect x="26" y="4" width="1" height="14" fill="#e0e0e8"/><rect x="24" y="16" width="6" height="2" fill="#8a6a1e"/><rect x="24" y="18" width="6" height="2" fill="#c9a24a"/><rect x="20" y="20" width="14" height="2" fill="#6b4423"/><rect x="26" y="20" width="2" height="8" fill="#8a5a2b"/><rect x="26" y="26" width="2" height="4" fill="#6b4423"/><circle cx="27" cy="29" r="1.5" fill="#c9a24a"/></svg>`,
+  potion: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" shape-rendering="crispEdges"><rect x="9" y="2" width="6" height="2" fill="#8a5a2b"/><rect x="8" y="4" width="8" height="2" fill="#a87a4a"/><rect x="7" y="6" width="10" height="16" fill="#3a1a1a"/><rect x="7" y="6" width="10" height="1" fill="#4a2a2a"/><rect x="8" y="14" width="8" height="7" fill="#c23a3a"/><rect x="8" y="14" width="8" height="1" fill="#e04a4a"/><rect x="9" y="15" width="2" height="4" fill="#ff8a8a" opacity="0.6"/><circle cx="12" cy="10" r="1" fill="#5a2a2a"/></svg>`,
+  hit_fx: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" shape-rendering="crispEdges"><path d="M16 4 L18 12 L26 10 L20 16 L28 18 L20 20 L26 26 L18 22 L16 30 L14 22 L6 26 L12 20 L4 18 L12 16 L6 10 L14 12 Z" fill="#ffe08a"/><path d="M16 8 L17 14 L22 12 L18 16 L24 18 L18 18 L22 22 L17 20 L16 26 L15 20 L10 22 L14 18 L8 18 L14 16 L10 12 L15 14 Z" fill="#ffffff"/><circle cx="16" cy="16" r="3" fill="#ff8a3a"/></svg>`,
+};
+
+// ============================================================
+// LOAD
+// ============================================================
+const IMG = {};
+let spritesReady = false;
+
+async function loadAllSprites() {
+  const promises = Object.entries(SPRITES).map(([name, svg]) => {
+    return new Promise((resolve) => {
+      const blob = new Blob([svg], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => { IMG[name] = img; URL.revokeObjectURL(url); resolve(); };
+      img.onerror = () => { console.warn('Failed:', name); resolve(); };
+      img.src = url;
+    });
+  });
+  await Promise.all(promises);
+  spritesReady = true;
+}
+
+// ============================================================
+// STATE
+// ============================================================
+const TILE = 32, MAP_W = 20, MAP_H = 15;
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+const minimap = document.getElementById('minimap');
+const mmCtx = minimap.getContext('2d');
+mmCtx.imageSmoothingEnabled = false;
+
+let map = [], buildings = [], entities = [], player = null;
+let particles = [], keys = {};
+let gameTime = 0, lastTime = 0, gameState = 'menu', pendingClass = 'warrior';
+let regenTimer = 0;
+
+const CLASSES = {
+  warrior: { name: 'Воин', sprite: 'warrior', hp: 120, mp: 20, atk: 12, def: 8 },
+  mage:    { name: 'Маг', sprite: 'warrior', hp: 70, mp: 100, atk: 5, def: 4 },
+  hunter:  { name: 'Охотник', sprite: 'warrior', hp: 90, mp: 50, atk: 10, def: 5 },
+  priest:  { name: 'Лекарь', sprite: 'warrior', hp: 80, mp: 80, atk: 6, def: 5 },
+  rogue:   { name: 'Разбойник', sprite: 'warrior', hp: 85, mp: 30, atk: 14, def: 4 },
+};
+
+// ============================================================
+// WORLD
+// ============================================================
+function initWorld() {
+  map = [];
+  for (let y = 0; y < MAP_H; y++) {
+    const row = [];
+    for (let x = 0; x < MAP_W; x++) row.push('grass');
+    map.push(row);
+  }
+  for (let y = 5; y < 8; y++) for (let x = 1; x < 4; x++) map[y][x] = 'stone';
+  for (let x = 3; x < 18; x++) map[9][x] = 'dirt';
+  for (let y = 5; y < 14; y++) map[y][8] = 'dirt';
+  for (let y = 2; y < 5; y++) for (let x = 15; x < 19; x++) map[y][x] = 'water';
+
+  buildings = [
+    { type: 'townhall', sprite: 'townhall', gx: 1, gy: 3, w: 2, h: 2 },
+    { type: 'house', sprite: 'house', gx: 5, gy: 5, w: 1, h: 1 },
+    { type: 'house', sprite: 'house', gx: 11, gy: 6, w: 1, h: 1 },
+  ];
+
+  entities = [
+    { id: 'qg', type: 'npc', sprite: 'questgiver', name: 'Старейшина Элдрин', gx: 5, gy: 9, x: 5 * TILE, y: 9 * TILE,
+      dialogue: "Приветствую, странник. Дракон Тенехвост терроризирует наши земли. Убей трёх гоблинов на восточной тропе — я щедро награжу тебя.", questId: 'q_goblins' },
+    { id: 'mc', type: 'npc', sprite: 'merchant', name: 'Торговец Велмар', gx: 7, gy: 7, x: 7 * TILE, y: 7 * TILE,
+      dialogue: "Товары лучшие в Элдории! Но сейчас не до торговли — сначала разберись с драконом." },
+    { id: 'e1', type: 'enemy', subtype: 'goblin', sprite: 'goblin', gx: 12, gy: 9, x: 12 * TILE, y: 9 * TILE, hp: 25, hpMax: 25, atk: 4, def: 1, xpReward: 25, goldReward: 8, cooldown: 0, alive: true },
+    { id: 'e2', type: 'enemy', subtype: 'goblin', sprite: 'goblin', gx: 14, gy: 8, x: 14 * TILE, y: 8 * TILE, hp: 25, hpMax: 25, atk: 4, def: 1, xpReward: 25, goldReward: 8, cooldown: 0, alive: true },
+    { id: 'e3', type: 'enemy', subtype: 'goblin', sprite: 'goblin', gx: 16, gy: 10, x: 16 * TILE, y: 10 * TILE, hp: 25, hpMax: 25, atk: 4, def: 1, xpReward: 25, goldReward: 8, cooldown: 0, alive: true },
+    { id: 'e4', type: 'enemy', subtype: 'wolf', sprite: 'wolf', gx: 14, gy: 11, x: 14 * TILE, y: 11 * TILE, hp: 40, hpMax: 40, atk: 6, def: 3, xpReward: 40, goldReward: 12, cooldown: 0, alive: true },
+    { id: 'e5', type: 'enemy', subtype: 'skeleton', sprite: 'skeleton', gx: 17, gy: 9, x: 17 * TILE, y: 9 * TILE, hp: 55, hpMax: 55, atk: 8, def: 4, xpReward: 60, goldReward: 20, cooldown: 0, alive: true },
+    { id: 'boss', type: 'enemy', subtype: 'dragon', sprite: 'dragon', gx: 16, gy: 6, x: 16 * TILE, y: 6 * TILE, hp: 300, hpMax: 300, atk: 18, def: 8, xpReward: 500, goldReward: 200, cooldown: 0, alive: true, isBoss: true, w: 2, h: 2 },
+  ];
+}
+
+// ============================================================
+// PLAYER
+// ============================================================
+function createPlayer(classKey) {
+  const cls = CLASSES[classKey];
+  return {
+    classKey, sprite: cls.sprite,
+    gx: 5, gy: 9, x: 5 * TILE, y: 9 * TILE,
+    startX: 5 * TILE, startY: 9 * TILE, targetX: 5 * TILE, targetY: 9 * TILE,
+    moving: false, moveTimer: 0,
+    hp: cls.hp, hpMax: cls.hp, mp: cls.mp, mpMax: cls.mp,
+    atk: cls.atk, def: cls.def,
+    level: 1, xp: 0, xpNext: 100, gold: 0,
+    inventory: [], equipment: { head: null, chest: null, weapon: null },
+    quests: [], attackCooldown: 0, invulnTimer: 0,
+  };
+}
+
+// ============================================================
+// COLLISION
+// ============================================================
+function tileBlocked(x, y) {
+  if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) return true;
+  if (map[y][x] === 'water') return true;
+  for (const b of buildings) if (x >= b.gx && x < b.gx + b.w && y >= b.gy && y < b.gy + b.h) return true;
+  return false;
+}
+
+function entityAt(x, y) {
+  for (const e of entities) {
+    if (!e.alive) continue;
+    if (e.w === 2) { if (x >= e.gx && x < e.gx + 2 && y >= e.gy && y < e.gy + 2) return e; }
+    else if (e.gx === x && e.gy === y) return e;
+  }
+  return null;
+}
+
+function tryMovePlayer(dx, dy) {
+  if (player.moving) return;
+  const nx = player.gx + dx, ny = player.gy + dy;
+  if (tileBlocked(nx, ny)) return;
+  if (entityAt(nx, ny)) return;
+  player.gx = nx; player.gy = ny;
+  player.startX = player.x; player.startY = player.y;
+  player.targetX = nx * TILE; player.targetY = ny * TILE;
+  player.moving = true; player.moveTimer = 0;
+}
+
+// ============================================================
+// COMBAT
+// ============================================================
+function attack() {
+  if (!player || player.attackCooldown > 0) return;
+  player.attackCooldown = 350;
+  for (const [dx, dy] of [[0,1],[0,-1],[1,0],[-1,0]]) {
+    const ent = entityAt(player.gx + dx, player.gy + dy);
+    if (ent && ent.type === 'enemy' && ent.alive) {
+      dealDamageTo(ent);
+      spawnHitFx((player.gx + dx) * TILE + TILE / 2, (player.gy + dy) * TILE + TILE / 2);
+      return;
+    }
+  }
+}
+
+function dealDamageTo(enemy) {
+  const atk = player.atk + (player.equipment.weapon?.atk || 0);
+  const dmg = Math.max(1, atk - enemy.def + Math.floor(Math.random() * 5));
+  enemy.hp -= dmg;
+  addFloat(enemy.gx * TILE + TILE / 2, enemy.gy * TILE, `-${dmg}`, '#ff5a5a');
+  if (enemy.hp <= 0) killEnemy(enemy);
+}
+
+function killEnemy(enemy) {
+  enemy.alive = false;
+  player.gold += enemy.goldReward;
+  addFloat(enemy.gx * TILE + TILE / 2, enemy.gy * TILE - 20, `+${enemy.goldReward}🪙`, '#f0c85a');
+  gainXp(enemy.xpReward);
+  for (const q of player.quests) {
+    if (!q.done && q.type === 'kill' && q.enemyType === enemy.subtype) {
+      q.progress++;
+      if (q.progress >= q.target) { q.done = true; showToast('Квест выполнен! Вернитесь к старейшине'); }
+    }
+  }
+  if (enemy.subtype === 'goblin' && Math.random() < 0.4) { player.inventory.push(makeItem('helmet')); showToast('Выпал шлем!'); }
+  else if (enemy.subtype === 'wolf' && Math.random() < 0.4) { player.inventory.push(makeItem('potion')); showToast('Выпало зелье!'); }
+  else if (enemy.subtype === 'skeleton' && Math.random() < 0.5) { player.inventory.push(makeItem('sword')); showToast('Выпал меч!'); }
+
+  if (enemy.isBoss) {
+    gameState = 'victory';
+    document.getElementById('victory-stats').textContent = `Уровень ${player.level} · ${player.gold} золота`;
+    document.getElementById('victory-modal').classList.add('active');
+  }
+}
+
+function gainXp(amount) {
+  player.xp += amount;
+  while (player.xp >= player.xpNext) {
+    player.xp -= player.xpNext;
+    player.level++;
+    player.xpNext = Math.floor(player.xpNext * 1.5);
+    player.hpMax += 15; player.hp = player.hpMax;
+    player.mpMax += 10; player.mp += 10;
+    player.atk += 2; player.def += 1;
+    addFloat(player.x + TILE / 2, player.y - 20, 'LEVEL UP!', '#ffe08a');
+    showToast(`Уровень ${player.level}!`);
+  }
+}
+
+function enemyAttackPlayer(enemy) {
+  if (player.invulnTimer > 0) return;
+  const pdef = player.def + (player.equipment.head?.def || 0) + (player.equipment.chest?.def || 0);
+  const dmg = Math.max(1, enemy.atk - pdef + Math.floor(Math.random() * 3));
+  player.hp -= dmg;
+  player.invulnTimer = 500;
+  addFloat(player.x + TILE / 2, player.y - 10, `-${dmg}`, '#ff5a5a');
+  if (player.hp <= 0) {
+    player.hp = 0;
+    gameState = 'dead';
+    document.getElementById('death-stats').textContent = `Уровень ${player.level} · ${player.gold} золота`;
+    document.getElementById('gameover-modal').classList.add('active');
+  }
+}
+
+// ============================================================
+// ITEMS
+// ============================================================
+const ITEMS = {
+  helmet: { name: 'Шлем', slot: 'head', def: 5, rarity: 'common', sprite: 'helmet' },
+  chest: { name: 'Броня', slot: 'chest', def: 10, rarity: 'common', sprite: 'chest_armor' },
+  sword: { name: 'Меч', slot: 'weapon', atk: 6, rarity: 'common', sprite: 'sword' },
+  potion: { name: 'Зелье', slot: null, rarity: 'common', sprite: 'potion',
+    use: () => { player.hp = Math.min(player.hpMax, player.hp + 50); addFloat(player.x + TILE / 2, player.y - 20, '+50', '#5aff8a'); } },
+};
+
+function makeItem(key) { return { key, ...ITEMS[key], id: Math.random().toString(36).slice(2) }; }
+
+// ============================================================
+// QUESTS
+// ============================================================
+const QUEST_DEFS = {
+  q_goblins: { id: 'q_goblins', name: 'Убить гоблинов', desc: 'Убей 3 гоблина на восточной тропе',
+    type: 'kill', enemyType: 'goblin', target: 3, xpReward: 100, goldReward: 50 },
+};
+
+function acceptQuest(id) {
+  if (player.quests.find(q => q.id === id)) return;
+  player.quests.push({ ...QUEST_DEFS[id], progress: 0, done: false, completed: false });
+  showToast('Квест принят: ' + QUEST_DEFS[id].name);
+}
+
+function completeQuest(id) {
+  const q = player.quests.find(q => q.id === id);
+  if (!q || q.completed) return;
+  q.done = true; q.completed = true;
+  gainXp(q.xpReward);
+  player.gold += q.goldReward;
+  showToast(`Квест завершён! +${q.xpReward} XP, +${q.goldReward} золота`);
+}
+
+// ============================================================
+// INPUT
+// ============================================================
+document.addEventListener('keydown', (e) => {
+  if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
+  if (gameState !== 'playing') return;
+  const k = e.key.toLowerCase();
+  if (['arrowup', 'w'].includes(k)) tryMovePlayer(0, -1);
+  else if (['arrowdown', 's'].includes(k)) tryMovePlayer(0, 1);
+  else if (['arrowleft', 'a'].includes(k)) tryMovePlayer(-1, 0);
+  else if (['arrowright', 'd'].includes(k)) tryMovePlayer(1, 0);
+  else if (k === ' ') attack();
+  else if (k === 'e') interact();
+  else if (k === 'i') toggleModal('inv-modal');
+  else if (k === 'q') toggleModal('quest-modal');
+  else if (k === 'escape') closeAllModals();
+});
+
+function interact() {
+  for (const [dx, dy] of [[0,1],[0,-1],[1,0],[-1,0]]) {
+    const ent = entityAt(player.gx + dx, player.gy + dy);
+    if (ent && ent.type === 'npc') { openDialogue(ent); return; }
+  }
+  showToast('Рядом никого нет');
+}
+
+// ============================================================
+// DIALOGUE
+// ============================================================
+function openDialogue(npc) {
+  closeAllModals();
+  document.getElementById('dialogue-name').textContent = npc.name;
+  let text = npc.dialogue;
+  const actions = document.getElementById('dialogue-actions');
+  actions.innerHTML = '';
+
+  if (npc.id === 'qg') {
+    const hasQuest = player.quests.find(q => q.id === npc.questId);
+    if (!hasQuest) {
+      const btn = document.createElement('button');
+      btn.textContent = 'Принять квест';
+      btn.onclick = () => { acceptQuest(npc.questId); closeAllModals(); };
+      actions.appendChild(btn);
+    } else if (hasQuest.done && !hasQuest.completed) {
+      text = `Отлично! Ты убил ${hasQuest.progress}/${hasQuest.target} гоблинов. Вот твоя награда!`;
+      const btn = document.createElement('button');
+      btn.textContent = 'Завершить квест';
+      btn.onclick = () => { completeQuest(npc.questId); closeAllModals(); };
+      actions.appendChild(btn);
+    } else if (!hasQuest.completed) {
+      text = `Прогресс: ${hasQuest.progress}/${hasQuest.target} гоблинов. Продолжай!`;
+    } else {
+      text = 'Спасибо, герой! Дракон всё ещё ждёт тебя на востоке.';
+    }
+  }
+
+  document.getElementById('dialogue-text').textContent = text;
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = 'Закрыть';
+  closeBtn.onclick = closeAllModals;
+  actions.appendChild(closeBtn);
+  document.getElementById('dialogue-modal').classList.add('active');
+}
+
+// ============================================================
+// UI HELPERS
+// ============================================================
+function toggleModal(id) {
+  const m = document.getElementById(id);
+  if (m.classList.contains('active')) m.classList.remove('active');
+  else {
+    closeAllModals();
+    m.classList.add('active');
+    if (id === 'inv-modal') renderInventory();
+    if (id === 'quest-modal') renderQuests();
+  }
+}
+
+function closeAllModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); }
+
+document.querySelectorAll('[data-close]').forEach(btn => {
+  btn.onclick = () => document.getElementById(btn.dataset.close).classList.remove('active');
+});
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.getElementById('game-wrap').appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+function addFloat(x, y, text, color) {
+  const el = document.createElement('div');
+  el.className = 'float-text';
+  el.textContent = text;
+  el.style.color = color;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  el.style.position = 'absolute';
+  document.getElementById('dmg-layer').appendChild(el);
+  setTimeout(() => el.remove(), 800);
+}
+
+function spawnHitFx(x, y) { particles.push({ x, y, life: 0.3, maxLife: 0.3 }); }
+
+function renderInventory() {
+  document.querySelectorAll('.equip-slot').forEach(el => {
+    const slot = el.dataset.slot;
+    const item = player.equipment[slot];
+    const label = slot === 'head' ? 'Шлем' : slot === 'chest' ? 'Броня' : 'Оружие';
+    el.innerHTML = `<span class="slot-label">${label}</span>`;
+    if (item && IMG[item.sprite]) {
+      const img = document.createElement('img');
+      img.src = IMG[item.sprite].src;
+      el.insertBefore(img, el.firstChild);
+      el.onclick = () => { player.inventory.push(item); player.equipment[slot] = null; renderInventory(); };
+    } else { el.onclick = null; }
+  });
+
+  const grid = document.getElementById('inv-grid');
+  grid.innerHTML = '';
+  if (player.inventory.length === 0) {
+    grid.innerHTML = '<p style="color:#8a8a9a;font-size:11px;grid-column:1/-1;text-align:center">Пусто</p>';
+  }
+  player.inventory.forEach((item, idx) => {
+    const slot = document.createElement('div');
+    slot.className = 'inv-slot';
+    const img = document.createElement('img');
+    img.src = IMG[item.sprite].src;
+    slot.appendChild(img);
+    const rar = document.createElement('div');
+    rar.className = 'rarity ' + item.rarity;
+    slot.appendChild(rar);
+    slot.title = item.name;
+    slot.onclick = () => {
+      if (item.slot === null) { item.use(); player.inventory.splice(idx, 1); }
+      else {
+        const cur = player.equipment[item.slot];
+        player.equipment[item.slot] = item;
+        player.inventory.splice(idx, 1);
+        if (cur) player.inventory.push(cur);
+      }
+      renderInventory();
+    };
+    grid.appendChild(slot);
+  });
+}
+
+function renderQuests() {
+  const list = document.getElementById('quest-list');
+  list.innerHTML = '';
+  if (player.quests.length === 0) {
+    list.innerHTML = '<p style="color:#8a8a9a;text-align:center">Нет активных квестов</p>';
+    return;
+  }
+  player.quests.forEach(q => {
+    const div = document.createElement('div');
+    div.className = 'quest-item' + (q.completed ? ' done' : '');
+    div.innerHTML = `<strong>${q.name}</strong><br><span style="color:#8a8a9a">${q.desc}</span><br>
+      <span style="color:${q.done ? '#5aff8a' : '#f0c85a'}">${q.progress}/${q.target}${q.done ? ' ✓' : ''}</span>`;
+    list.appendChild(div);
+  });
+}
+
+// ============================================================
+// UPDATE
+// ============================================================
+function update(dt) {
+  gameTime += dt;
+  if (gameState !== 'playing') return;
+
+  if (player.moving) {
+    player.moveTimer += dt;
+    const t = Math.min(1, player.moveTimer / 0.12);
+    player.x = player.startX + (player.targetX - player.startX) * t;
+    player.y = player.startY + (player.targetY - player.startY) * t;
+    if (t >= 1) { player.moving = false; player.x = player.targetX; player.y = player.targetY; }
+  }
+
+  player.attackCooldown = Math.max(0, player.attackCooldown - dt * 1000);
+  player.invulnTimer = Math.max(0, player.invulnTimer - dt * 1000);
+
+  regenTimer += dt;
+  if (regenTimer >= 2) {
+    regenTimer = 0;
+    if (player.hp < player.hpMax) player.hp = Math.min(player.hpMax, player.hp + 1);
+  }
+
+  for (const e of entities) {
+    if (!e.alive || e.type !== 'enemy') continue;
+    e.cooldown -= dt * 1000;
+    if (e.cooldown > 0) continue;
+    const dx = player.gx - e.gx, dy = player.gy - e.gy;
+    const dist = Math.abs(dx) + Math.abs(dy);
+    if (e.w === 2) {
+      const adx = Math.max(0, Math.max(e.gx - player.gx, player.gx - (e.gx + 1)));
+      const ady = Math.max(0, Math.max(e.gy - player.gy, player.gy - (e.gy + 1)));
+      if (adx + ady <= 1) { e.cooldown = 1200; enemyAttackPlayer(e); }
+    } else {
+      if (dist === 1) { e.cooldown = 1200; enemyAttackPlayer(e); }
+      else if (dist <= 5) {
+        e.cooldown = 900;
+        let nx = e.gx, ny = e.gy;
+        if (Math.abs(dx) > Math.abs(dy)) nx += Math.sign(dx); else ny += Math.sign(dy);
+        if (!tileBlocked(nx, ny) && !entityAt(nx, ny) && !(player.gx === nx && player.gy === ny)) {
+          e.gx = nx; e.gy = ny; e.x = nx * TILE; e.y = ny * TILE;
+        }
+      }
+    }
+  }
+
+  particles.forEach(p => p.life -= dt);
+  particles = particles.filter(p => p.life > 0);
+  updateHud();
+}
+
+function updateHud() {
+  document.getElementById('hp-fill').style.width = (player.hp / player.hpMax * 100) + '%';
+  document.getElementById('hp-val').textContent = `${Math.ceil(player.hp)}/${player.hpMax}`;
+  document.getElementById('mp-fill').style.width = (player.mp / player.mpMax * 100) + '%';
+  document.getElementById('mp-val').textContent = `${Math.ceil(player.mp)}/${player.mpMax}`;
+  document.getElementById('xp-fill').style.width = (player.xp / player.xpNext * 100) + '%';
+  document.getElementById('xp-val').textContent = `${player.xp}/${player.xpNext}`;
+  document.getElementById('lvl-label').textContent = `LVL ${player.level}`;
+  document.getElementById('gold-val').textContent = player.gold;
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+  if (!spritesReady) {
+    ctx.fillStyle = '#1a1a2a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#f0c85a'; ctx.font = '16px monospace'; ctx.textAlign = 'center';
+    ctx.fillText('Загрузка...', canvas.width / 2, canvas.height / 2);
+    return;
+  }
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      const img = IMG[map[y][x]];
+      if (img) ctx.drawImage(img, x * TILE, y * TILE, TILE, TILE);
+    }
+  }
+
+  for (const b of buildings) {
+    const img = IMG[b.sprite];
+    if (img) ctx.drawImage(img, b.gx * TILE, b.gy * TILE, b.w * TILE, b.h * TILE);
+  }
+
+  for (const e of entities) {
+    if (!e.alive) continue;
+    const img = IMG[e.sprite];
+    if (!img) continue;
+    const w = e.w === 2 ? TILE * 2 : TILE;
+    ctx.drawImage(img, e.gx * TILE, e.gy * TILE, w, w);
+    if (e.type === 'enemy' && e.hp < e.hpMax) {
+      const bx = e.gx * TILE, by = e.gy * TILE - 6;
+      ctx.fillStyle = '#0a0a0a'; ctx.fillRect(bx, by, w, 4);
+      ctx.fillStyle = '#ff3a3a'; ctx.fillRect(bx, by, w * (e.hp / e.hpMax), 4);
+    }
+  }
+
+  if (player && player.hp > 0) {
+    if (player.invulnTimer > 0 && Math.floor(gameTime * 20) % 2 === 0) ctx.globalAlpha = 0.5;
+    const img = IMG[player.sprite];
+    if (img) ctx.drawImage(img, player.x, player.y, TILE, TILE);
+    ctx.globalAlpha = 1;
+  }
+
+  for (const p of particles) {
+    const img = IMG['hit_fx'];
+    if (img) {
+      ctx.globalAlpha = p.life / p.maxLife;
+      ctx.drawImage(img, p.x - TILE / 2, p.y - TILE / 2, TILE, TILE);
+      ctx.globalAlpha = 1;
+    }
+  }
+  renderMinimap();
+}
+
+function renderMinimap() {
+  const mw = minimap.width, mh = minimap.height;
+  const sx = mw / MAP_W, sy = mh / MAP_H;
+  mmCtx.clearRect(0, 0, mw, mh);
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      const t = map[y][x];
+      mmCtx.fillStyle = t === 'dirt' ? '#8a5a2b' : t === 'water' ? '#3a8ad8' : t === 'stone' ? '#8a8a9a' : '#6ab84a';
+      mmCtx.fillRect(x * sx, y * sy, sx + 1, sy + 1);
+    }
+  }
+  for (const b of buildings) { mmCtx.fillStyle = '#c9a24a'; mmCtx.fillRect(b.gx * sx, b.gy * sy, b.w * sx, b.h * sy); }
+  for (const e of entities) {
+    if (!e.alive) continue;
+    if (e.type === 'enemy') { mmCtx.fillStyle = e.isBoss ? '#a85aff' : '#ff3a3a'; mmCtx.fillRect(e.gx * sx, e.gy * sy, Math.max(2, sx), Math.max(2, sy)); }
+    else if (e.type === 'npc') { mmCtx.fillStyle = '#5ad8ff'; mmCtx.fillRect(e.gx * sx, e.gy * sy, Math.max(2, sx), Math.max(2, sy)); }
+  }
+  if (player) { mmCtx.fillStyle = '#5aff8a'; mmCtx.fillRect(player.gx * sx - 1, player.gy * sy - 1, Math.max(3, sx + 2), Math.max(3, sy + 2)); }
+}
+
+// ============================================================
+// LOOP
+// ============================================================
+function gameLoop(ts) {
+  const dt = Math.min(0.05, (ts - lastTime) / 1000);
+  lastTime = ts;
+  update(dt);
+  render();
+  requestAnimationFrame(gameLoop);
+}
+
+// ============================================================
+// START
+// ============================================================
+function renderClassCards() {
+  const grid = document.getElementById('class-grid');
+  grid.innerHTML = '';
+  for (const [key, cls] of Object.entries(CLASSES)) {
+    const card = document.createElement('div');
+    card.className = 'class-card' + (key === pendingClass ? ' selected' : '');
+    card.innerHTML = `<img src="${IMG[cls.sprite].src}" alt="${cls.name}"><div class="name">${cls.name}</div><div class="stats">HP ${cls.hp} · MP ${cls.mp}</div>`;
+    card.onclick = () => {
+      pendingClass = key;
+      document.querySelectorAll('.class-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+    };
+    grid.appendChild(card);
+  }
+}
+
+async function startGame() {
+  await loadAllSprites();
+  renderClassCards();
+
+  document.getElementById('start-btn').onclick = () => {
+    document.getElementById('start-modal').classList.remove('active');
+    initWorld();
+    player = createPlayer(pendingClass);
+    gameState = 'playing';
+    updateHud();
+  };
+  document.getElementById('restart-btn').onclick = () => {
+    document.getElementById('gameover-modal').classList.remove('active');
+    document.getElementById('start-modal').classList.add('active');
+    gameState = 'menu';
+  };
+  document.getElementById('victory-restart-btn').onclick = () => {
+    document.getElementById('victory-modal').classList.remove('active');
+    document.getElementById('start-modal').classList.add('active');
+    gameState = 'menu';
+  };
+
+  lastTime = performance.now();
+  requestAnimationFrame(gameLoop);
+}
+startGame();
+</script>
+</body>
+</html>
